@@ -315,6 +315,19 @@ def test_ignore_multiples5():
         'person': ['William Shakespeare']
     }
 
+def test_ignore_multiples6():
+    data1 = {
+        'name': ['Mr William Shakespeare', 'Christopher Marlowe']
+    }
+    data2 = {
+        'person': ['Anne Hathaway', 'William SHAKESPEARE']
+    }
+    results = textmatch.run(data1, data2, ignores=[['case', 'titles']])
+    assert results.to_pydict() == {
+        'name': ['Mr William Shakespeare'],
+        'person': ['William SHAKESPEARE']
+    }
+
 def test_methods_levenshtein():
     data1 = {
         'name': ['William Shakespeare', 'Anne Hathaway']

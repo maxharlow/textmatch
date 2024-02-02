@@ -299,7 +299,7 @@ def ignore_words_order(data: PolarsDataframe, header: str) -> PolarsDataframe:
 def ignore_regex(filters: Optional[list[str]], ignore_case: bool) -> Callable[[PolarsDataframe, str], PolarsDataframe]:
     def filterer(data: PolarsDataframe, header: str) -> PolarsDataframe:
         if filters is None: return data
-        regex = '(?i)' if ignore_case else '' + '|'.join(filters)
+        regex = ('(?i)' if ignore_case else '') + '|'.join(filters)
         return data.with_columns(polars.col(header).str.replace_all(regex, ''))
     return filterer
 
