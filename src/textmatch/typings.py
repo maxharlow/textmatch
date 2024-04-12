@@ -1,4 +1,4 @@
-from typing import Optional, Callable, Union, TypeAlias, TypeVar
+from typing import Optional, Callable, TypeAlias, TypeVar
 import polars
 import pyarrow # transitive dependency of polars
 import pandas # transitive dependency of polars

@@ -1,6 +1,5 @@
 from typing import Optional, Callable, cast
 import importlib.resources
-import os
 import re
 import unidecode
 import polars
