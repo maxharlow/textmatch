@@ -194,7 +194,7 @@ def match_apply_double(
     headerset2_applied2 = [f'_block{index}{header}_applied2' for header in fieldmap2.values()]
     for header_ignorant, header_applied, header_applied1, header_applied2 in zip(headerset1_ignorant, headerset1_applied, headerset1_applied1, headerset1_applied2):
         data1 = application(data1, header_ignorant, header_applied, header_applied1, header_applied2)
-    for header_ignorant, header_applied, header_applied1, header_applied2 in zip(headerset2_ignorant, headerset1_applied, headerset2_applied1, headerset2_applied2):
+    for header_ignorant, header_applied, header_applied1, header_applied2 in zip(headerset2_ignorant, headerset2_applied, headerset2_applied1, headerset2_applied2):
         data2 = application(data2, header_ignorant, header_applied, header_applied1, header_applied2)
     if tick: tick()
     joined_set_1x1 = data2.join(data1, left_on=headerset2_applied1, right_on=headerset1_applied1, how='inner')
