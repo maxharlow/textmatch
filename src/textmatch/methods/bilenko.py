@@ -5,11 +5,12 @@ import signal
 import colorama
 import polars
 import dedupe
+import dedupe.core
+import dedupe.variables
 
 from ..typings import (
     PolarsDataframe,
-    DedupeVariable,
-    DedupeLabels,
+    DedupeLabelledData,
     TextmatchTicker,
     TextmatchAlert
 )
@@ -43,7 +44,7 @@ def execute(
         data1 = data1.drop(match_column)
         data2 = data2.drop(match_column)
     # create a Dedupe variable specification listing all the match columns
-    variables = [DedupeVariable(field=f'_block{index}_match_col{i}', type='String') for i in range(len(headers1))]
+    variables = [dedupe.variables.String(f'_block{index}_match_col{i}') for i in range(len(headers1))]
     # set up Dedupe
     linker = dedupe.RecordLink(variables, in_memory=True) # generate pairs in-memory, uses more memory, but faster
     linker.prepare_training(input1, input2, sample_size=15_000) # this sample size is what's used in the Dedupe docs
@@ -85,32 +86,51 @@ def label(linker: dedupe.RecordLink, fields1: list[str], fields2: list[str]) -> 
     colorama.just_fix_windows_console()
     sys.stderr.write(f'\n{colorama.Style.BRIGHT}{colorama.Fore.BLUE}To answer questions:\n y - yes\n n - no\n s - skip\n f - finished{colorama.Style.RESET_ALL}\n')
     fieldlength = len(max([*fields1, *fields2], key=len))
-    labels = DedupeLabels(distinct=[], match=[])
+    fields = dedupe.core.unique(variable.field for variable in linker.data_model.field_variables)
+    unlabelled = []
+    labels_positive = 0
+    labels_negative = 0
     finished = False
     while not finished:
-        for pair in linker.uncertain_pairs():
-            for i, record in enumerate(pair):
-                sys.stderr.write('\n')
-                for j, field in enumerate(set(field.field for field in linker.data_model.primary_variables)):
-                    header = fields1[j] if i == 0 else fields2[j]
-                    spacer = ' ' * (fieldlength - len(header))
-                    sys.stderr.write(f'{spacer}{colorama.Style.BRIGHT}{header}: {colorama.Style.RESET_ALL}{record[field]}\n')
+        try:
+            if not unlabelled: unlabelled = linker.uncertain_pairs()
+            pair = unlabelled.pop()
+        except IndexError:
+            break
+        for i, record in enumerate(pair):
             sys.stderr.write('\n')
-            responded = False
-            while not responded:
-                sys.stderr.write(f'{colorama.Style.BRIGHT}{colorama.Fore.BLUE}Do these records refer to the same thing? [y/n/s/f]{colorama.Style.RESET_ALL} ')
-                try:
-                    response = input()
-                except KeyboardInterrupt as e:
-                    signal.signal(signal.SIGINT, lambda *x: None) # so threading exception is suppressed
-                    sys.stderr.write('\n') # so error message doesn't get printed on same line
-                    raise e
-                responded = True
-                match response:
-                    case 'y': labels['match'].append(pair)
-                    case 'n': labels['distinct'].append(pair)
-                    case 's': continue
-                    case 'f': finished = True
-                    case  _ : responded = False
-    sys.stderr.write('\n')
-    linker.mark_pairs(labels)
+            for j, field in enumerate(fields):
+                header = fields1[j] if i == 0 else fields2[j]
+                spacer = ' ' * (fieldlength - len(header))
+                sys.stderr.write(f'{spacer}{colorama.Style.BRIGHT}{header}: {colorama.Style.RESET_ALL}{record[field]}\n')
+        sys.stderr.write('\n')
+        sys.stderr.write(f'{colorama.Style.BRIGHT}{colorama.Fore.BLUE}Progress: {labels_positive} positive, {labels_negative} negative{colorama.Style.RESET_ALL}\n')
+        response = ''
+        responded = False
+        while not responded:
+            sys.stderr.write(f'{colorama.Style.BRIGHT}{colorama.Fore.BLUE}Do these records refer to the same thing? [y/n/s/f]{colorama.Style.RESET_ALL} ')
+            try:
+                response = input()
+                if response in {'y', 'n', 's', 'f'}: responded = True
+            except KeyboardInterrupt as e:
+                signal.signal(signal.SIGINT, lambda *x: None)
+                sys.stderr.write('\n') # so error message doesn't get printed on same line
+                raise e
+        labelled: DedupeLabelledData = {
+            'distinct': [],
+            'match': []
+        }
+        match response:
+            case 'y':
+                labelled['match'].append(pair)
+                labels_positive += 1
+            case 'n':
+                labelled['distinct'].append(pair)
+                labels_negative += 1
+            case 's':
+                labelled['match'].append(pair)
+                labelled['distinct'].append(pair)
+            case 'f':
+                finished = True
+        linker.mark_pairs(labelled)
+        sys.stderr.write('\n')

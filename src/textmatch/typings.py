@@ -8,8 +8,7 @@ PolarsDataframe: TypeAlias = polars.DataFrame
 ArrowDataframe: TypeAlias = pyarrow.Table
 PandasDataframe: TypeAlias = pandas.DataFrame
 
-DedupeVariable = dedupe._typing.VariableDefinition
-DedupeLabels = dedupe._typing.TrainingData
+DedupeLabelledData = dedupe._typing.TrainingData
 
 TextmatchSource: TypeAlias = dict[str, str] | PolarsDataframe | ArrowDataframe | PandasDataframe
 TextmatchBlocks: TypeAlias = list[tuple[int, dict[str, str], dict[str, str], list[str], str, float]]
