@@ -436,6 +436,8 @@ You can also include the matching degree number as a column by specifying it in 
 
 **`bilenko`** uses [Dedupe](https://github.com/dedupeio/dedupe), a library built by Forest Gregg and Derek Eder based on the work of Mikhail Bilenko that will ask you to train it by asking whether different pairs of records should match. The information you give it is then extrapolated to match up the rest of the dataset. The more examples you give it, the better the results will be. At minimum, try to provide 10 positive matches and 10 negative matches. Performs custom matching.
 
+This uses Python multiprocessing, which requires you wrap your code in an if statement [as described here](https://docs.python.org/3/library/multiprocessing.html#multiprocessing-safe-main-import).
+
 ### Blocking
 
 Blocking is the approach of performing multiple matches, with subsequent matches only applying to the subset of matches resulting from the previous match. This can make matches both quicker and more precise. This is an advanced topic, and can be ignored if you are happy with the quality of matches and are dealing with smaller datasets.
