@@ -7,19 +7,19 @@ name = "textmatch"
 version = "1.0.1"
 description = "Find fuzzy matches between datasets."
 readme = "README.md"
-requires-python = "== 3.11.*"
+requires-python = "== 3.13.*"
 license = "Apache-2.0"
 urls.source = "https://github.com/maxharlow/textmatch"
 authors = [
     {name = "Max Harlow", email = "contact@maxharlow.com"}
 ]
 dependencies = [
-    "polars[pyarrow,pandas] == 0.20.*",
-    "polars-distance == 0.4.*",
+    "polars[pyarrow,pandas] == 1.21.*",
+    "polars-distance == 0.5.*",
     "colorama == 0.4.*",
     "unidecode == 1.3.*",
     "doublemetaphone == 1.1.*",
-    "dedupe == 2.0.*"
+    "dedupe == 3.0.*"
 ]
 
 [dependency-groups]
