@@ -1,4 +1,4 @@
-from typing import Optional, Callable, TypeAlias, TypeVar
+from typing import Optional, Callable, TypeAlias
 import polars
 import pyarrow # transitive dependency of polars
 import pandas # transitive dependency of polars
@@ -15,5 +15,3 @@ TextmatchBlocks: TypeAlias = list[tuple[int, dict[str, str], dict[str, str], lis
 TextmatchProgress: TypeAlias = Optional[Callable[[str, int], Callable[[], None]]]
 TextmatchAlert: TypeAlias = Optional[Callable[[str, Optional[str]], None]]
 TextmatchTicker: TypeAlias = Callable[[int], Optional[Callable[[], None]]]
-
-I = TypeVar('I')

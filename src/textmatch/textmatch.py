@@ -12,8 +12,7 @@ from .typings import (
     TextmatchBlocks,
     TextmatchProgress,
     TextmatchAlert,
-    TextmatchTicker,
-    I
+    TextmatchTicker
 )
 
 def run(source1: TextmatchSource,
@@ -84,7 +83,7 @@ def disambiguate(data: PolarsDataframe, name: str) -> tuple[PolarsDataframe, dic
     data = data.with_row_index(f'_{name}_id')
     return data, dict(columnlist)
 
-def fix(items: list[I], length: int) -> list[I]:
+def fix[I](items: list[I], length: int) -> list[I]:
     if len(items) < length:
         return items + [items[-1]] * (length - len(items))
     else: # assumes items can't be longer than length
