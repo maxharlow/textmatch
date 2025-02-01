@@ -367,7 +367,7 @@ def format(
     duplicates = {pair for pair in column_items if column_names.count(pair[0]) > 1}
     for name, identifier in duplicates:
         if identifier.startswith('_data1'):
-            if alert: alert(f'{name}: column appears in both datasets; will be disambiguated', 'info')
+            if alert: alert(f'{name}: column appears in both datasets, will be disambiguated', importance='warning')
             columnmap1[f'{name}_1'] = columnmap1.pop(name)
         if identifier.startswith('_data2'):
             columnmap2[f'{name}_2'] = columnmap2.pop(name)

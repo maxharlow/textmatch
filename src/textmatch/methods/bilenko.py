@@ -53,7 +53,7 @@ def execute(
             message = str(warning)
             if message.startswith('The least populated class'):
                 message = 'More training will produce better results!'
-            if alert: alert(message, 'warning')
+            if alert: alert(message, importance='warning')
         warnings.showwarning = warning_alert
         while True:
             label(linker, fields1, fields2)
@@ -61,7 +61,7 @@ def execute(
                 linker.train() # throws a ValueError if not enough training has been done
                 break
             except ValueError:
-                if alert: alert('Not enough training has been completed to run a match', 'warning')
+                if alert: alert('Not enough training has been completed to run a match', importance='warning')
         tick = ticker(3) if ticker else None
         if tick: tick()
         # run a Dedupe join
