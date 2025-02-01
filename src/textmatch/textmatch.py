@@ -1,4 +1,4 @@
-from typing import Optional, Callable, cast
+from typing import Callable, Optional, cast
 import importlib.resources
 import re
 import unidecode
@@ -8,15 +8,15 @@ from .typings import (
     PolarsDataframe,
     PandasDataframe,
     ArrowDataframe,
-    TextmatchSource,
-    TextmatchBlocks,
-    TextmatchProgress,
-    TextmatchAlert,
-    TextmatchTicker
+    Source,
+    Blocks,
+    Ticker,
+    Progress,
+    Alert
 )
 
-def run(source1: TextmatchSource,
-        source2: TextmatchSource,
+def run(source1: Source,
+        source2: Source,
         fields1: Optional[list[list[str]]] = None,
         fields2: Optional[list[list[str]]] = None,
         ignores: list[list[str]] = [[]],
@@ -24,8 +24,8 @@ def run(source1: TextmatchSource,
         thresholds: list[float] = [0.6],
         output: Optional[list[str]] = None,
         join: str = 'inner',
-        progress: TextmatchProgress = None,
-        alert: TextmatchAlert = None) -> ArrowDataframe:
+        progress: Optional[Progress] = None,
+        alert: Optional[Alert] = None) -> ArrowDataframe:
     data1 = use(source1)
     data2 = use(source2)
     data1, columnmap1 = disambiguate(data1, 'data1')
@@ -67,10 +67,10 @@ def run(source1: TextmatchSource,
     results = format(outputs, columnmap1, columnmap2, output, alert)
     return results.to_arrow()
 
-def use(source: TextmatchSource) -> PolarsDataframe:
+def use(source: Source) -> PolarsDataframe:
     form = str(type(source)).split('\'')[1]
     if form == 'dict':
-        return PolarsDataframe(source)
+        return polars.from_dict(cast(dict, source))
     elif form == 'polars.dataframe.frame.DataFrame':
         return cast(PolarsDataframe, source)
     elif form == 'pyarrow.lib.Table':
@@ -100,9 +100,9 @@ def fix[I](items: list[I], length: int) -> list[I]:
 def match(
         data1: PolarsDataframe,
         data2: PolarsDataframe,
-        blocks: TextmatchBlocks,
-        progress: TextmatchProgress,
-        alert: TextmatchAlert,
+        blocks: Blocks,
+        progress: Optional[Progress],
+        alert: Optional[Alert],
         parent: Optional[PolarsDataframe] = None) -> PolarsDataframe:
     if len(blocks) == 0:
         if parent is None: raise Exception('nothing to match') # should never happen
@@ -157,7 +157,7 @@ def match_apply(
         fieldmap1: dict[str, str],
         fieldmap2: dict[str, str],
         index: int,
-        ticker: TextmatchTicker) -> PolarsDataframe:
+        ticker: Ticker) -> PolarsDataframe:
     tick = ticker(2) # no way to do this live, so just have two ticks, before and after the join
     def application(data, header_ignorant, header_applied):
         if function is None: return data.with_columns(polars.col(header_ignorant).alias(header_applied))
@@ -184,7 +184,7 @@ def match_apply_double(
         fieldmap1: dict[str, str],
         fieldmap2: dict[str, str],
         index: int,
-        ticker: TextmatchTicker) -> PolarsDataframe:
+        ticker: Ticker) -> PolarsDataframe:
     tick = ticker(6)
     def application(data, header_ignorant, header_applied, header_applied1, header_applied2):
         data = data.with_columns(polars.col(header_ignorant).map_elements(function, polars.List(polars.String)).alias(header_applied))
@@ -226,7 +226,7 @@ def match_compare(
         fieldmap2: dict[str, str],
         threshold: float,
         index: int,
-        ticker: TextmatchTicker) -> PolarsDataframe:
+        ticker: Ticker) -> PolarsDataframe:
     tick = ticker(4)
     headerset1 = list(fieldmap1.values())
     headerset2 = list(fieldmap2.values())
@@ -336,7 +336,7 @@ def format(
         columnmap1: dict[str, str],
         columnmap2: dict[str, str],
         output: Optional[list[str]],
-        alert: TextmatchAlert) -> PolarsDataframe:
+        alert: Optional[Alert]) -> PolarsDataframe:
     matches = matches.with_columns(polars.concat_str(polars.col([column for column in matches.columns if column.endswith('_degree')]), separator='; ').alias('_degree'))
     headerset = []
     if output is None:

@@ -1,3 +1,4 @@
+from typing import Optional
 import os
 import sys
 import warnings
@@ -11,8 +12,8 @@ import dedupe.variables
 from ..typings import (
     PolarsDataframe,
     DedupeLabelledData,
-    TextmatchTicker,
-    TextmatchAlert
+    Ticker,
+    Alert
 )
 
 os.environ['PYTHONWARNINGS'] = 'ignore::UserWarning' # apparently the only way to suppress warnings coming from sklearn
@@ -24,8 +25,8 @@ def execute(
         fieldmap2: dict[str, str],
         threshold: float,
         index: int,
-        ticker: TextmatchTicker,
-        alert: TextmatchAlert) -> PolarsDataframe:
+        ticker: Ticker,
+        alert: Optional[Alert]) -> PolarsDataframe:
     fields1 = list(fieldmap1.keys())
     fields2 = list(fieldmap2.keys())
     headers1 = list(fieldmap1.values())
