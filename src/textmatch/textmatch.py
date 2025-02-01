@@ -54,6 +54,14 @@ def run(source1: TextmatchSource,
     methods_fixed = fix(methods, blocks_number)
     thresholds_fixed = fix(thresholds, blocks_number)
     blocks = list(zip(indexes, fieldmaps1, fieldmaps2, ignores_fixed, methods_fixed, thresholds_fixed))
+    if alert:
+        for block in blocks:
+            (index, fieldmap1, fieldmap2, ignoreset, method, threshold) = block
+            plan_index = f'({index + 1}) ' if len(blocks) > 1 else ''
+            plan_method = method.capitalize() + (f' {threshold}' if method in {'levenshtein', 'jaro', 'bilenko'} else '')
+            plan_ignore = ' – ignoring ' + ', '.join(ignoreset) if len(ignoreset) > 0 else ''
+            plan_fields = ', '.join(f'"{a}" × "{b}"' for a, b in zip(fieldmap1.keys(), fieldmap2.keys()))
+            alert(f'{plan_index}{plan_method} match{plan_ignore}: {plan_fields}')
     matches = match(data1, data2, blocks, progress, alert)
     outputs = supplement(join, data1, data2, matches)
     results = format(outputs, columnmap1, columnmap2, output, alert)
