@@ -170,7 +170,7 @@ Combining different forms of ignorance can be quite powerful. The order in which
   | Sam Collins | Vietnam | none     | Sam Collins | Vietnam  |
 </details>
 
-**`nonlatin`** ignores non-Latin characters – so `Jérôme` will match `Jerome`, `Weiß` will match `Weiss`, and `Пушкин` will match `Pushkin`. The further the script is from the Latin alphabet, the less accurate this transliteration will be.
+**`nonlatin`** ignores non-Latin characters – so `Jérôme` will match `Jerome`, `Weiß` will match `Weiss`, and `Пушкин` will match `Pushkin`. The further the script is from the Latin alphabet, the less accurate this transliteration will be. You may also want to consider applying [Unicode normalisation](https://docs.python.org/3/library/unicodedata.html#unicodedata.normalize) beforehand.
 
 <details>
   <summary>Example</summary>
