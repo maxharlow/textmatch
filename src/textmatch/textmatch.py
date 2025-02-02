@@ -76,7 +76,7 @@ def use(source: Source) -> PolarsDataframe:
     elif form == 'pyarrow.lib.Table':
         return cast(PolarsDataframe, polars.from_arrow(source))
     elif form == 'pandas.core.frame.DataFrame':
-        return cast(PolarsDataframe, polars.from_pandas(cast(PandasDataframe, source)))
+        return polars.from_pandas(cast(PandasDataframe, source))
     else:
         raise Exception('unknown data format')
 
