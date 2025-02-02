@@ -1,8 +1,6 @@
 from typing import Optional
-import os
 import sys
 import warnings
-import signal
 import colorama
 import polars
 import dedupe
@@ -15,8 +13,6 @@ from ..typings import (
     Ticker,
     Alert
 )
-
-os.environ['PYTHONWARNINGS'] = 'ignore::UserWarning' # apparently the only way to suppress warnings coming from sklearn
 
 def execute(
         data1: PolarsDataframe,
@@ -110,13 +106,8 @@ def label(linker: dedupe.RecordLink, fields1: list[str], fields2: list[str]) -> 
         responded = False
         while not responded:
             sys.stderr.write(f'{colorama.Style.BRIGHT}{colorama.Fore.BLUE}Do these records refer to the same thing? [y/n/s/f]{colorama.Style.RESET_ALL} ')
-            try:
-                response = input()
-                if response in {'y', 'n', 's', 'f'}: responded = True
-            except KeyboardInterrupt as e:
-                signal.signal(signal.SIGINT, lambda *x: None)
-                sys.stderr.write('\n') # so error message doesn't get printed on same line
-                raise e
+            response = input()
+            if response in {'y', 'n', 's', 'f'}: responded = True
         labelled: DedupeLabelledData = {
             'distinct': [],
             'match': []
