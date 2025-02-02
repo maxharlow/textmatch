@@ -552,8 +552,8 @@ def progress(operation, total):
     bar = tqdm.notebook.tqdm(desc=operation, total=total, bar_format='{desc} {bar} {percentage:3.0f}% {remaining} left', dynamic_ncols=True)
     return bar.update
 
-def alert(message, importance):
-    print(f'[{importance.upper()}] {message}')
+def alert(message, *, importance = None):
+    print(f'[{importance.upper()}] {message}' if importance else message)
 ```
 
 These functions are then passed as arguments when you run Textmatch:
