@@ -65,8 +65,9 @@ The input datasets can be dataframes from [PyArrow](https://arrow.apache.org/doc
   textmatch.run(
     data1,
     data2,
-    fields1=[['name']],
-    fields2=[['Person Name']]
+    matching=[
+      {'fields': [{'1': 'name', '2': 'Person Name'}]}
+    ]
   )
   ```
 
@@ -88,11 +89,12 @@ Matches are _many-to-many_, ie. it is possible for one row in the first dataset 
 Usage
 -----
 
-Textmatch has one function, `run`, which accepts the first dataset followed by the second. All other arguments are optional, described below:
+Textmatch has one function, `run`, which accepts the first dataset followed by the second. All other arguments are optional.
 
-### Fields
+The `match` argument accepts a list of dictionaries, where each dictionary represents a matching block.
 
-The `fields1` and `fields2` arguments accept two-dimensional lists of column names that should be used for the match. These should be in the same order for both datasets – the first column specified for the first dataset will be compared against the first column specified for the second dataset, and so on. The columns can only contain strings. Defaults to comparing all columns. The outer list is used for [blocking](#blocking).
+### Match fields
+Within each match block, the `fields` key defines which columns should be compared. It accepts a list of dictionaries, where each dictionary maps a column from the first dataset (`1`) to a column from the second dataset (`2`). Defaults to comparing all columns.
 
 <details>
   <summary>Example</summary>
@@ -103,8 +105,14 @@ The `fields1` and `fields2` arguments accept two-dimensional lists of column nam
   textmatch.run(
     data1,
     data2,
-    fields1=[['name', 'place']],
-    fields2=[['Person Name', 'Location']]
+    matching=[
+      {
+        'fields': [
+          {'1': 'name', '2': 'Person Name'},
+          {'1': 'place', '2': 'Location'}
+        ]
+      }
+    ]
   )
   ```
 
@@ -116,9 +124,8 @@ The `fields1` and `fields2` arguments accept two-dimensional lists of column nam
 </details>
 
 
-### Ignorance
-
-The `ignores` argument accepts a two-dimensional list of characteristics which should be disregarded for two records to be considered a match. The outer list is used for [blocking](#blocking).
+### Match ignorance
+Within each match block, the `ignores` key accepts a list of characteristics which should be disregarded for two records to be considered a match.
 
 Combining different forms of ignorance can be quite powerful. The order in which you specify them is not significant.
 
@@ -131,9 +138,12 @@ Combining different forms of ignorance can be quite powerful. The order in which
   textmatch.run(
     data1,
     data2,
-    fields1=[['name']],
-    fields2=[['Person Name']],
-    ignores=[['case']]
+    matching=[
+      {
+        'fields': [{'1': 'name', '2': 'Person Name'}],
+        'ignores': ['case']
+      }
+    ]
   )
   ```
 
@@ -155,9 +165,12 @@ Combining different forms of ignorance can be quite powerful. The order in which
   textmatch.run(
     data1,
     data2,
-    fields1=[['name']],
-    fields2=[['Person Name']],
-    ignores=[['nonalpha']]
+    matching=[
+      {
+        'fields': [{'1': 'name', '2': 'Person Name'}],
+        'ignores': ['nonalpha']
+      }
+    ]
   )
   ```
 
@@ -179,9 +192,12 @@ Combining different forms of ignorance can be quite powerful. The order in which
   textmatch.run(
     data1,
     data2,
-    fields1=[['name']],
-    fields2=[['Person Name']],
-    ignores=[['nonlatin']]
+    matching=[
+      {
+        'fields': [{'1': 'name', '2': 'Person Name'}],
+        'ignores': ['nonlatin']
+      }
+    ]
   )
   ```
 
@@ -203,9 +219,12 @@ Combining different forms of ignorance can be quite powerful. The order in which
   textmatch.run(
     data1,
     data2,
-    fields1=[['name']],
-    fields2=[['Person Name']],
-    ignores=[['words-leading']]
+    matching=[
+      {
+        'fields': [{'1': 'name', '2': 'Person Name'}],
+        'ignores': ['words-leading']
+      }
+    ]
   )
   ```
 
@@ -230,9 +249,12 @@ Combining different forms of ignorance can be quite powerful. The order in which
   textmatch.run(
     data1,
     data2,
-    fields1=[['name']],
-    fields2=[['Person Name']],
-    ignores=[['words-tailing']]
+    matching=[
+      {
+        'fields': [{'1': 'name', '2': 'Person Name'}],
+        'ignores': ['words-tailing']
+      }
+    ]
   )
   ```
 
@@ -256,9 +278,12 @@ Combining different forms of ignorance can be quite powerful. The order in which
   textmatch.run(
     data1,
     data2,
-    fields1=[['name']],
-    fields2=[['Person Name']],
-    ignores=[['words-order']]
+    matching=[
+      {
+        'fields': [{'1': 'name', '2': 'Person Name'}],
+        'ignores': ['words-order']
+      }
+    ]
   )
   ```
 
@@ -280,9 +305,12 @@ Combining different forms of ignorance can be quite powerful. The order in which
   textmatch.run(
     data1,
     data2,
-    fields1=[['name']],
-    fields2=[['Person Name']],
-    ignores=[['titles']]
+    matching=[
+      {
+        'fields': [{'1': 'name', '2': 'Person Name'}],
+        'ignores': ['titles']
+      }
+    ]
   )
   ```
 
@@ -306,9 +334,12 @@ Combining different forms of ignorance can be quite powerful. The order in which
   textmatch.run(
     data1,
     data2,
-    fields1=[['name']],
-    fields2=[['Person Name']],
-    ignores=[['regex= Esq$']]
+    matching=[
+      {
+        'fields': [{'1': 'name', '2': 'Person Name'}],
+        'ignores': ['regex= Esq$']
+      }
+    ]
   )
   ```
 
@@ -321,17 +352,17 @@ Combining different forms of ignorance can be quite powerful. The order in which
   | Sam Collins       | Vietnam | none     | Sam Collins   | Vietnam  |
 </details>
 
-### Methods & thresholds
+### Match methods & thresholds
 
-The `methods` argument accepts a list of methods. This lets you specify the algorithm which is used to do the matching. Subsequent items in the list are used for [blocking](#blocking).
+Within each match block, the `method` key specifies the algorithm used for matching.
 
 There are three different categories of method:
 
 * _Compared_ methods work by comparing every row from the first dataset with every row from the second, producing a number that represents the degree of the match. This means the amount of time required to run a match grows exponentially with the size of the input datasets. However, they are still useful for larger matches when using [blocking](#blocking).
 * _Applied_ methods transform text into a different representation before they are matched up. These methods are quicker than compared ones, though no meaningful matching degree number is generated – either they match or they don't.
-* _Custom_ methods have their own individual approach. Textmatch only has one, [Bilenko](#bilenko). It generates a matching degree number.
+* _Custom_ methods have their own individual approach. Textmatch only has one, Bilenko. It generates a matching degree number.
 
-For those matching methods that generate a matching degree number there is then a threshold filter for any two records to be considered to be a match – you can adjust this with the `threshold` argument, which accepts a list of numbers between 0.0 and 1.0, defaulting to 0.6. Subsequent items in the list are also used for [blocking](#blocking).
+For those matching methods that generate a matching degree number there is then a threshold filter for any two records to be considered to be a match – you can adjust this with the `threshold` key, which accepts a number between 0.0 and 1.0, defaulting to 0.6.
 
 You can also include the matching degree number as a column by specifying it in the [outputs](#outputs).
 
@@ -349,9 +380,12 @@ You can also include the matching degree number as a column by specifying it in 
   textmatch.run(
     data1,
     data2,
-    fields1=[['name']],
-    fields2=[['Person Name']],
-    methods=['levenshtein']
+    matching=[
+      {
+        'fields': [{'1': 'name', '2': 'Person Name'}],
+        'method': 'levenshtein'
+      }
+    ]
   )
   ```
 
@@ -379,9 +413,12 @@ You can also include the matching degree number as a column by specifying it in 
   textmatch.run(
     data1,
     data2,
-    fields1=[['name']],
-    fields2=[['Person Name']],
-    methods=['jaro']
+    matching=[
+      {
+        'fields': [{'1': 'name', '2': 'Person Name'}],
+        'method': 'jaro'
+      }
+    ]
   )
   ```
 
@@ -417,9 +454,12 @@ You can also include the matching degree number as a column by specifying it in 
   textmatch.run(
     data1,
     data2,
-    fields1=[['name']],
-    fields2=[['Person Name']],
-    methods=['metaphone']
+    matching=[
+      {
+        'fields': [{'1': 'name', '2': 'Person Name'}],
+        'method': 'metaphone'
+      }
+    ]
   )
   ```
 
@@ -431,7 +471,6 @@ You can also include the matching degree number as a column by specifying it in 
   | Roy Bland     | London  | Soldier   | Roy Bland     | UK       |
   | George Smiley | London  | Beggerman | George SMILEY | London   |
   | Sam Collins   | Vietnam | none      | Sam Collins   | Vietnam  |
-  | Bill Haydon   | London  | Tailor    | Bill-Haydon   | London   |
 </details>
 
 **`bilenko`** uses [Dedupe](https://github.com/dedupeio/dedupe), a library built by Forest Gregg and Derek Eder based on the work of Mikhail Bilenko that will ask you to train it by asking whether different pairs of records should match. The information you give it is then extrapolated to match up the rest of the dataset. The more examples you give it, the better the results will be. At minimum, try to provide 10 positive matches and 10 negative matches. Performs custom matching.
@@ -442,7 +481,7 @@ This uses Python multiprocessing, which requires you wrap your code in an if sta
 
 Blocking is the approach of performing multiple matches, with subsequent matches only applying to the subset of matches resulting from the previous match. This can make matches both quicker and more precise. This is an advanced topic, and can be ignored if you are happy with the quality of matches and are dealing with smaller datasets.
 
-In a 'regular' match, you are really just matching using a single block. Each block is defined by: a list of fields for each dataset, a list of ignores, a method, and a threshold. To perform a blocked match Textmatche needs to know each of these things for each block. You specify these through list arguments, or through outer lists for those arguments where the block requires a list itself. If you specify one of these things less than the total number of blocks – such as if you had two blocks, but specified the threshold once – that value will then be used for all subsequent blocks.
+In a 'regular' match, you are really just matching using a single block. Each block is defined by: a list of fields for each dataset, a list of ignores, a method, and a threshold. To perform a blocked match, provide multiple dictionaries in the `match` list. Each dictionary corresponds to one block.
 
 <details>
   <summary>Example</summary>
@@ -453,10 +492,18 @@ In a 'regular' match, you are really just matching using a single block. Each bl
   textmatch.run(
     data1,
     data2,
-    fields1=[['name']],
-    fields2=[['Person Name']],
-    ignores=[['case', 'words-leading'], ['words-tailing']],
-    methods=['literal', 'levenshtein']
+    matching=[
+      {
+          'fields': [{'1': 'name', '2': 'Person Name'}],
+          'ignores': ['case', 'words-leading'],
+          'method': 'literal'
+      },
+      {
+          'fields': [{'1': 'name', '2': 'Person Name'}],
+          'ignores': ['words-tailing'],
+          'method': 'levenshtein'
+      }
+    ]
   )
   ```
 
@@ -483,9 +530,12 @@ There are some special column definitions: `1*` and `2*` expand into all columns
   textmatch.run(
     data1,
     data2,
-    fields1=[['name']],
-    fields2=[['Person Name']],
-    methods=['levenshtein'],
+    matching=[
+      {
+        'fields': [{'1': 'name', '2': 'Person Name'}],
+        'method': 'levenshtein'
+      }
+    ],
     output=['2*', '1.codename', 'degree']
   )
   ```
@@ -516,8 +566,9 @@ The `join` argument takes a string that indicates what other nonmatching records
   textmatch.run(
     data1,
     data2,
-    fields1=[['name']],
-    fields2=[['Person Name']],
+    matching=[
+      {'fields': [{'1': 'name', '2': 'Person Name'}]}
+    ],
     join='left-outer'
   )
   ```
@@ -562,8 +613,9 @@ These functions are then passed as arguments when you run Textmatch:
 textmatch.run(
     data1,
     data2,
-    fields1=[['name']],
-    fields2=[['Person Name']],
+    matching=[
+        {'fields': [{'1': 'name', '2': 'Person Name'}]}
+    ],
     progress=progress,
     alert=alert
 ).to_pandas()

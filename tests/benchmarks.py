@@ -23,42 +23,84 @@ def test_literal(benchmark):
         'Person': 'name',
         'Office': 'company'
     }
-    fields = [list(specification.keys())]
     data1, data2 = mock(specification, 100)
-    benchmark(textmatch.run, data1, data2, fields1=fields, fields2=fields)
+    benchmark(
+        textmatch.run,
+        data1,
+        data2,
+        matching=[{
+            'method': 'literal',
+            'fields': [{'1': key, '2': key} for key in specification]
+        }]
+    )
 
 def test_literal_ignore_case(benchmark):
     specification = {
         'Person': 'name',
         'Office': 'company'
     }
-    fields = [list(specification.keys())]
     data1, data2 = mock(specification, 100)
-    benchmark(textmatch.run, data1, data2, fields1=fields, fields2=fields, ignores=[['case']])
+    benchmark(
+        textmatch.run,
+        data1,
+        data2,
+        matching=[{
+            'method': 'literal',
+            'fields': [{'1': key, '2': key} for key in specification],
+            'ignores': ['case']
+        }]
+    )
 
 def test_levenshtein(benchmark):
     specification = {
         'Person': 'name',
         'Office': 'company'
     }
-    fields = [list(specification.keys())]
     data1, data2 = mock(specification, 100)
-    benchmark(textmatch.run, data1, data2, fields1=fields, fields2=fields, methods=['levenshtein'])
+    benchmark(
+        textmatch.run,
+        data1,
+        data2,
+        matching=[{
+            'method': 'levenshtein',
+            'fields': [{'1': key, '2': key} for key in specification]
+        }]
+    )
 
 def test_metaphone(benchmark):
     specification = {
         'Person': 'name',
         'Office': 'company'
     }
-    fields = [list(specification.keys())]
     data1, data2 = mock(specification, 100)
-    benchmark(textmatch.run, data1, data2, fields1=fields, fields2=fields, methods=['metaphone'])
+    benchmark(
+        textmatch.run,
+        data1,
+        data2,
+        matching=[{
+            'method': 'metaphone',
+            'fields': [{'1': key, '2': key} for key in specification]
+        }]
+    )
 
 def test_blocking(benchmark):
     specification = {
         'Surname': 'last_name',
         'Forename': 'first_name'
     }
-    fields = [['Surname'], ['Forename']]
     data1, data2 = mock(specification, 100)
-    benchmark(textmatch.run, data1, data2, fields1=fields, fields2=fields, methods=['literal', 'metaphone'])
+    benchmark(
+        textmatch.run,
+        data1,
+        data2,
+        matching=[
+            {
+                'method': 'literal',
+                'fields': [{'1': key, '2': key} for key in specification]
+            },
+            {
+                'method': 'metaphone',
+                'fields': [{'1': key, '2': key} for key in specification]
+            }
+        ]
+    )

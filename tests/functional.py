@@ -7,7 +7,10 @@ def test_simple():
     data2 = {
         'person': ['Anne Hathaway', 'William Shakespeare']
     }
-    results = textmatch.run(data1, data2)
+    results = textmatch.run(
+        data1,
+        data2
+    )
     assert results.to_pydict() == {
         'name': ['William Shakespeare'],
         'person': ['William Shakespeare']
@@ -20,7 +23,10 @@ def test_spaces_in_column_names():
     data2 = {
         'person name': ['Anne Hathaway', 'William Shakespeare']
     }
-    results = textmatch.run(data1, data2)
+    results = textmatch.run(
+        data1,
+        data2
+    )
     assert results.to_pydict() == {
         'name': ['William Shakespeare'],
         'person name': ['William Shakespeare']
@@ -35,7 +41,10 @@ def test_multiple_columns():
         'person': ['Christopher Marlowe', 'William Shakespeare'],
         'birth': ['unknown', '1564']
     }
-    results = textmatch.run(data1, data2)
+    results = textmatch.run(
+        data1,
+        data2
+    )
     assert results.to_pydict() == {
         'name': ['William Shakespeare'],
         'born': ['1564'],
@@ -50,7 +59,10 @@ def test_multiple_matches():
     data2 = {
         'person': ['Anne Hathaway', 'Christopher Marlowe', 'Christopher Marlowe']
     }
-    results = textmatch.run(data1, data2)
+    results = textmatch.run(
+        data1,
+        data2
+    )
     assert results.to_pydict() == {
         'name': ['Anne Hathaway', 'Anne Hathaway', 'Christopher Marlowe', 'Christopher Marlowe'],
         'person': ['Anne Hathaway', 'Anne Hathaway', 'Christopher Marlowe', 'Christopher Marlowe']
@@ -63,7 +75,10 @@ def test_multiple_matches2():
     data2 = {
         'firstname': ['Anne', 'Anne', 'Hamlet']
     }
-    results = textmatch.run(data1, data2)
+    results = textmatch.run(
+        data1,
+        data2
+    )
     assert results.to_pydict() == {
         'forename': ['Anne', 'Anne'],
         'firstname': ['Anne', 'Anne']
@@ -76,7 +91,10 @@ def test_no_matches():
     data2 = {
         'person': ['William Shakespeare', 'Someone Else']
     }
-    results = textmatch.run(data1, data2)
+    results = textmatch.run(
+        data1,
+        data2
+    )
     assert results.to_pydict() == {
         'name': [],
         'person': []
@@ -89,7 +107,10 @@ def test_same_headers():
     data2 = {
         'name': ['William Shakespeare', 'Christopher Marlowe']
     }
-    results = textmatch.run(data1, data2)
+    results = textmatch.run(
+        data1,
+        data2
+    )
     assert results.to_pydict() == {
         'name_1': ['Christopher Marlowe'],
         'name_2': ['Christopher Marlowe']
@@ -104,7 +125,13 @@ def test_fields_specified():
         'person': ['William Shakespeare', 'Anne Hathaway'],
         'hometown': ['Stratford-upon-Avon', 'Stratford-upon-Avon']
     }
-    results = textmatch.run(data1, data2, fields1=[['name']], fields2=[['person']])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'fields': [{'1': 'name', '2': 'person'}]}
+        ]
+    )
     assert results.to_pydict() == {
         'name': ['William Shakespeare'],
         'person': ['William Shakespeare'],
@@ -121,7 +148,18 @@ def test_fields_ordering():
         'birth': ['1564', '1556'],
         'person': ['William Shakespeare', 'Anne Hathaway']
     }
-    results = textmatch.run(data1, data2, fields1=[['name', 'born']], fields2=[['person', 'birth']])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {
+                'fields': [
+                    {'1': 'name', '2': 'person'},
+                    {'1': 'born', '2': 'birth'}
+                ]
+            }
+        ]
+    )
     assert results.to_pydict() == {
         'name': ['William Shakespeare'],
         'born': ['1564'],
@@ -138,7 +176,14 @@ def test_blocks_simple():
         'last_name': ['Shakespeare', 'Shakespeare', 'Hathaway'],
         'first_name': ['William', 'John', 'Anne']
     }
-    results = textmatch.run(data1, data2, fields1=[['surname'], ['forename']], fields2=[['last_name'], ['first_name']])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'fields': [{'1': 'surname', '2': 'last_name'}]},
+            {'fields': [{'1': 'forename', '2': 'first_name'}]}
+        ]
+    )
     assert results.to_pydict() == {
         'forename': ['William'],
         'surname': ['Shakespeare'],
@@ -153,7 +198,13 @@ def test_ignore_case():
     data2 = {
         'person': ['william shakespeare', 'christopher marlowe']
     }
-    results = textmatch.run(data1, data2, ignores=[['case']])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'ignores': ['case']}
+        ]
+    )
     assert results.to_pydict() == {
         'name': ['Christopher Marlowe'],
         'person': ['christopher marlowe']
@@ -166,7 +217,13 @@ def test_ignore_regex():
     data2 = {
         'person': ['THREE Christopher Marlowe', 'FOUR William Shakespeare']
     }
-    results = textmatch.run(data1, data2, ignores=[['regex=ONE|TWO|THREE|FOUR']])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'ignores': ['regex=ONE|TWO|THREE|FOUR']}
+        ]
+    )
     assert results.to_pydict() == {
         'name': ['TWO Christopher Marlowe'],
         'person': ['THREE Christopher Marlowe']
@@ -179,7 +236,13 @@ def test_ignore_titles():
     data2 = {
         'person': ['Mr. Christopher Marlowe', 'Mrs. Anne Hathaway']
     }
-    results = textmatch.run(data1, data2, ignores=[['titles']])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'ignores': ['titles']}
+        ]
+    )
     assert results.to_pydict() == {
         'name': ['Ms. Anne Hathaway'],
         'person': ['Mrs. Anne Hathaway']
@@ -192,7 +255,13 @@ def test_ignore_nonlatin():
     data2 = {
         'person': ['Gabriel Garcia Marquez', 'Leo Tolstoy']
     }
-    results = textmatch.run(data1, data2, ignores=[['nonlatin']])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'ignores': ['nonlatin']}
+        ]
+    )
     assert results.to_pydict() == {
         'name': ['Gabriel García Márquez'],
         'person': ['Gabriel Garcia Marquez']
@@ -205,7 +274,13 @@ def test_ignore_nonalpha():
     data2 = {
         'person': ['Anne Hathaway!', 'William Shakespeare.']
     }
-    results = textmatch.run(data1, data2, ignores=[['nonalpha']])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'ignores': ['nonalpha']}
+        ]
+    )
     assert results.to_pydict() == {
         'name': ['William Shakespeare', 'Anne-Hathaway'],
         'person': ['William Shakespeare.', 'Anne Hathaway!']
@@ -218,7 +293,13 @@ def test_ignore_words_leading():
     data2 = {
         'person': ['Christopher Marlowe', 'Billy Shakespeare']
     }
-    results = textmatch.run(data1, data2, ignores=[['words-leading']])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'ignores': ['words-leading']}
+        ]
+    )
     assert results.to_pydict() == {
         'name': ['William Shakespeare'],
         'person': ['Billy Shakespeare']
@@ -231,7 +312,13 @@ def test_ignore_words_tailing():
     data2 = {
         'person': ['Christopher Marlowe', 'William S.']
     }
-    results = textmatch.run(data1, data2, ignores=[['words-tailing']])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'ignores': ['words-tailing']}
+        ]
+    )
     assert results.to_pydict() == {
         'name': ['William Shakespeare'],
         'person': ['William S.']
@@ -244,7 +331,13 @@ def test_ignore_words_order():
     data2 = {
         'person': ['Anne Hathaway', 'Shakespeare William']
     }
-    results = textmatch.run(data1, data2, ignores=[['words-order']])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'ignores': ['words-order']}
+        ]
+    )
     assert results.to_pydict() == {
         'name': ['William Shakespeare', 'Anne Hathaway'],
         'person': ['Shakespeare William', 'Anne Hathaway']
@@ -257,7 +350,13 @@ def test_ignore_multiples1():
     data2 = {
         'person': ['Pröf William Shakespeare', 'Christopher Marlowe']
     }
-    results = textmatch.run(data1, data2, ignores=[['nonlatin', 'titles']])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'ignores': ['nonlatin', 'titles']}
+        ]
+    )
     assert results.to_pydict() == {
         'name': ['William Shakespeare'],
         'person': ['Pröf William Shakespeare']
@@ -270,7 +369,13 @@ def test_ignore_multiples2():
     data2 = {
         'person': ['Arden, Mary', 'Hathaway, Anne']
     }
-    results = textmatch.run(data1, data2, ignores=[['nonlatin', 'nonalpha', 'words-order']])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'ignores': ['nonlatin', 'nonalpha', 'words-order']}
+        ]
+    )
     assert results.to_pydict() == {
         'name': ['Mary Árden'],
         'person': ['Arden, Mary']
@@ -283,7 +388,13 @@ def test_ignore_multiples3():
     data2 = {
         'person': ['Harper Lee', 'Fórster, ÉM']
     }
-    results = textmatch.run(data1, data2, ignores=[['nonlatin', 'nonalpha', 'words-order']])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'ignores': ['nonlatin', 'nonalpha', 'words-order']}
+        ]
+    )
     assert results.to_pydict() == {
         'name': ['EM Forster'],
         'person': ['Fórster, ÉM']
@@ -296,7 +407,13 @@ def test_ignore_multiples4():
     data2 = {
         'person': ['BRONTE, CHARLOTTE', 'SHAKESPEARE, WILLIAM']
     }
-    results = textmatch.run(data1, data2, ignores=[['case', 'nonlatin', 'nonalpha', 'words-order']])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'ignores': ['case', 'nonlatin', 'nonalpha', 'words-order']}
+        ]
+    )
     assert results.to_pydict() == {
         'name': ['William Shakespeare', 'Charlotte Brontë'],
         'person': ['SHAKESPEARE, WILLIAM', 'BRONTE, CHARLOTTE']
@@ -309,7 +426,13 @@ def test_ignore_multiples5():
     data2 = {
         'person': ['Anne Hathaway', 'William Shakespeare']
     }
-    results = textmatch.run(data1, data2, ignores=[['nonalpha', 'nonlatin']])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'ignores': ['nonalpha', 'nonlatin']}
+        ]
+    )
     assert results.to_pydict() == {
         'name': ['William Shakéspeare'],
         'person': ['William Shakespeare']
@@ -322,7 +445,13 @@ def test_ignore_multiples6():
     data2 = {
         'person': ['Anne Hathaway', 'William SHAKESPEARE']
     }
-    results = textmatch.run(data1, data2, ignores=[['case', 'titles']])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'ignores': ['case', 'titles']}
+        ]
+    )
     assert results.to_pydict() == {
         'name': ['Mr William Shakespeare'],
         'person': ['William SHAKESPEARE']
@@ -335,7 +464,13 @@ def test_methods_levenshtein():
     data2 = {
         'person': ['Ann Athawei', 'Will Sheikhspere']
     }
-    results = textmatch.run(data1, data2, methods=['levenshtein'])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'method': 'levenshtein'}
+        ]
+    )
     assert results.to_pydict() == {
         'name': ['William Shakespeare', 'Anne Hathaway'],
         'person': ['Will Sheikhspere', 'Ann Athawei']
@@ -348,7 +483,13 @@ def test_methods_levenshtein_no_matches():
     data2 = {
         'person': ['William Shakespeare', 'Someone Else']
     }
-    results = textmatch.run(data1, data2, methods=['levenshtein'])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'method': 'levenshtein'}
+        ]
+    )
     assert results.to_pydict() == {
         'name': [],
         'person': []
@@ -365,7 +506,19 @@ def test_methods_levenshtein_fields():
         'person': ['Will Sheikhspere', 'Anne Hathaway'],
         'location': ['Henley Street', 'Cottage Lane']
     }
-    results = textmatch.run(data1, data2, fields1=[['name', 'address']], fields2=[['person', 'location']], methods=['levenshtein'])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {
+                'fields': [
+                    {'1': 'name', '2': 'person'},
+                    {'1': 'address', '2': 'location'}
+                ],
+                'method': 'levenshtein'
+            }
+        ]
+    )
     assert results.to_pydict() == {
         'name': ['William Shakespeare'],
         'address': ['Henley Street'],
@@ -382,7 +535,13 @@ def test_methods_jaro():
     data2 = {
         'person': ['Chris Barlow', 'Willy Shake-Spear']
     }
-    results = textmatch.run(data1, data2, methods=['jaro'])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'method': 'jaro'}
+        ]
+    )
     assert results.to_pydict() == {
         'name': ['William Shakespeare', 'Christopher Marlowe'],
         'person': ['Willy Shake-Spear', 'Chris Barlow']
@@ -395,7 +554,13 @@ def test_methods_jaro_no_matches():
     data2 = {
         'person': ['William Shakespeare', 'Someone Else']
     }
-    results = textmatch.run(data1, data2, methods=['jaro'])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'method': 'jaro'}
+        ]
+    )
     assert results.to_pydict() == {
         'name': [],
         'person': []
@@ -408,7 +573,13 @@ def test_methods_metaphone():
     data2 = {
         'person': ['Ann Hathaweii', 'Will Sheikhspere']
     }
-    results = textmatch.run(data1, data2, methods=['metaphone'])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'method': 'metaphone'}
+        ]
+    )
     assert results.to_pydict() == {
         'name': ['Anne Hathaway'],
         'person': ['Ann Hathaweii']
@@ -421,7 +592,13 @@ def test_methods_metaphone_no_matches():
     data2 = {
         'person': ['William Shakespeare', 'Someone Else']
     }
-    results = textmatch.run(data1, data2, methods=['metaphone'])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'method': 'metaphone'}
+        ]
+    )
     assert results.to_pydict() == {
         'name': [],
         'person': []
@@ -436,7 +613,20 @@ def test_methods_multiple1():
         'lastname': ['Athawei', 'Hathaway', 'Hathaway', 'Whateley'],
         'firstname': ['Anne', 'Hamnet', 'Ann', 'Anne']
     }
-    results = textmatch.run(data1, data2, fields1=[['forename'], ['surname']], fields2=[['firstname'], ['lastname']], methods=['metaphone', 'literal'])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {
+                'fields': [{'1': 'forename', '2': 'firstname'}],
+                'method': 'metaphone'
+            },
+            {
+                'fields': [{'1': 'surname', '2': 'lastname'}],
+                'method': 'literal'
+            }
+        ]
+    )
     assert results.to_pydict() == {
         'forename': ['Anne'],
         'surname': ['Hathaway'],
@@ -455,7 +645,25 @@ def test_methods_multiple2():
         'lastname': ['Athawei', 'Sheikhspere', 'Hathaway', 'Whateley'],
         'firstname': ['Ann', 'William', 'Anne', 'Anne']
     }
-    results = textmatch.run(data1, data2, fields1=[['country'], ['forename', 'surname']], fields2=[['residence'], ['firstname', 'lastname']], methods=['literal', 'levenshtein'])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {
+                'fields': [
+                    {'1': 'country', '2': 'residence'}
+                ],
+                'method': 'literal'
+            },
+            {
+                'fields': [
+                    {'1': 'forename', '2': 'firstname'},
+                    {'1': 'surname', '2': 'lastname'}
+                ],
+                'method': 'levenshtein'
+            }
+        ]
+    )
     assert results.to_pydict() == {
         'forename': ['William'],
         'surname': ['Shakespeare'],
@@ -474,7 +682,14 @@ def test_output():
         'person': ['Anne Hathaway', 'William Shakespeare'],
         'death': ['1623', '1616']
     }
-    results = textmatch.run(data1, data2, fields1=[['Person Name']], fields2=[['person']], output=['1*', '2.death', 'degree'])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'fields': [{'1': 'Person Name', '2': 'person'}]}
+        ],
+        output=['1*', '2.death', 'degree']
+    )
     assert results.to_pydict() == {
         'Person Name': ['William Shakespeare'],
         'born': ['1564'],
@@ -491,7 +706,19 @@ def test_output_pairwise():
         'person': ['Anne Hathaway', 'Wiliam Shakspeare'],
         'death': ['1623', '1616']
     }
-    results = textmatch.run(data1, data2, fields1=[['Person Name']], fields2=[['person']], methods=['levenshtein'], output=['1*', '2.death', 'degree'])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {
+                'fields': [
+                    {'1': 'Person Name', '2': 'person'}
+                ],
+                'method': 'levenshtein'
+            }
+        ],
+        output=['1*', '2.death', 'degree']
+    )
     assert results.to_pydict() == {
         'Person Name': ['William Shakespeare'],
         'born': ['1564'],
@@ -508,7 +735,19 @@ def test_output_blocks():
         'last_name': ['Shakespeare', 'Shakespeare', 'Hathaway'],
         'first_name': ['William', 'John', 'Anne']
     }
-    results = textmatch.run(data1, data2, fields1=[['surname'], ['forename']], fields2=[['last_name'], ['first_name']], output=['1*', 'degree'])
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {
+                'fields': [{'1': 'surname', '2': 'last_name'}]
+            },
+            {
+                'fields': [{'1': 'forename', '2': 'first_name'}]
+            }
+        ],
+        output=['1*', 'degree']
+    )
     assert results.to_pydict() == {
         'forename': ['William'],
         'surname': ['Shakespeare'],
@@ -522,7 +761,11 @@ def test_join_left_outer():
     data2 = {
         'person': ['Anne Hathaway', 'William Shakespeare']
     }
-    results = textmatch.run(data1, data2, join='left-outer')
+    results = textmatch.run(
+        data1,
+        data2,
+        join='left-outer'
+    )
     assert results.to_pydict() == {
         'name': ['William Shakespeare', 'Christopher Marlowe'],
         'person': ['William Shakespeare', None]
@@ -535,7 +778,11 @@ def test_join_right_outer():
     data2 = {
         'person': ['Anne Hathaway', 'William Shakespeare']
     }
-    results = textmatch.run(data1, data2, join='right-outer')
+    results = textmatch.run(
+        data1,
+        data2,
+        join='right-outer'
+    )
     assert results.to_pydict() == {
         'name': ['William Shakespeare', None],
         'person': ['William Shakespeare', 'Anne Hathaway']
@@ -548,7 +795,11 @@ def test_join_full_outer():
     data2 = {
         'person': ['Anne Hathaway', 'William Shakespeare']
     }
-    results = textmatch.run(data1, data2, join='full-outer')
+    results = textmatch.run(
+        data1,
+        data2,
+        join='full-outer'
+    )
     assert results.to_pydict() == {
         'name': ['William Shakespeare', 'Christopher Marlowe', None],
         'person': ['William Shakespeare', None, 'Anne Hathaway']

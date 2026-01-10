@@ -9,6 +9,7 @@ from .typings import (
     PandasDataframe,
     ArrowDataframe,
     Source,
+    Matching,
     Blocks,
     Ticker,
     Progress,
@@ -17,11 +18,7 @@ from .typings import (
 
 def run(source1: Source,
         source2: Source,
-        fields1: Optional[list[list[str]]] = None,
-        fields2: Optional[list[list[str]]] = None,
-        ignores: list[list[str]] = [[]],
-        methods: list[str] = ['literal'],
-        thresholds: list[float] = [0.6],
+        matching: Optional[Matching] = None,
         output: Optional[list[str]] = None,
         join: str = 'inner',
         progress: Optional[Progress] = None,
@@ -30,30 +27,34 @@ def run(source1: Source,
     data2 = use(source2)
     data1, columnmap1 = disambiguate(data1, 'data1')
     data2, columnmap2 = disambiguate(data2, 'data2')
-    fields1 = fields1 if fields1 else [list(columnmap1.keys())]
-    fields2 = fields2 if fields2 else [list(columnmap2.keys())]
-    blocks_number = max(len(fields1), len(fields2), len(ignores), len(methods))
-    indexes = range(blocks_number)
-    fields1 = fix(fields1, blocks_number)
-    fields2 = fix(fields2, blocks_number)
-    for fieldset in fields1:
-        for field in fieldset:
-            if field not in columnmap1.keys(): raise Exception(f'{field}: field not found')
+    if matching is None: matching = [{}]
+    blocks = []
+    for i, matchblock in enumerate(matching):
+        fields = matchblock.get('fields')
+        if fields:
+            fields1 = []
+            fields2 = []
+            for field in fields:
+                fields1.append(field.get('1'))
+                fields2.append(field.get('2'))
+        else:
+            fields1 = list(columnmap1.keys())
+            fields2 = list(columnmap2.keys())
+        method = matchblock.get('method', 'literal')
+        ignores = matchblock.get('ignores', [])
+        threshold = matchblock.get('threshold', 0.6)
+        for field in fields1:
+            if field not in columnmap1: raise Exception(f'{field}: field not found')
             if data1.schema[columnmap1[field]] != polars.String: raise Exception(f'{field}: field is not a string')
-    for fieldset in fields2:
-        for field in fieldset:
-            if field not in columnmap2.keys(): raise Exception(f'{field}: field not found')
+        for field in fields2:
+            if field not in columnmap2: raise Exception(f'{field}: field not found')
             if data2.schema[columnmap2[field]] != polars.String: raise Exception(f'{field}: field is not a string')
-    for fieldpairs1, fieldpairs2 in zip(fields1, fields2):
-        if len(fieldpairs1) != len(fieldpairs2): raise Exception('both inputs must have the same number of fields specified')
-    headers1 = [[columnmap1[field] for field in fieldset] for fieldset in fields1]
-    headers2 = [[columnmap2[field] for field in fieldset] for fieldset in fields2]
-    fieldmaps1 = [dict([(fields1[i][j], value) for j, value in enumerate(fieldslist)]) for i, fieldslist in enumerate(headers1)]
-    fieldmaps2 = [dict([(fields2[i][j], value) for j, value in enumerate(fieldslist)]) for i, fieldslist in enumerate(headers2)]
-    ignores_fixed = fix(ignores, blocks_number)
-    methods_fixed = fix(methods, blocks_number)
-    thresholds_fixed = fix(thresholds, blocks_number)
-    blocks = list(zip(indexes, fieldmaps1, fieldmaps2, ignores_fixed, methods_fixed, thresholds_fixed))
+        if len(fields1) != len(fields2): raise Exception('both inputs must have the same number of fields specified')
+        header1 = [columnmap1[field] for field in fields1]
+        header2 = [columnmap2[field] for field in fields2]
+        fieldmap1 = {fields1[j]: header1[j] for j in range(len(fields1))}
+        fieldmap2 = {fields2[j]: header2[j] for j in range(len(fields2))}
+        blocks.append((i, fieldmap1, fieldmap2, ignores, method, threshold))
     if alert:
         for block in blocks:
             (index, fieldmap1, fieldmap2, ignoreset, method, threshold) = block
@@ -90,12 +91,6 @@ def disambiguate(data: PolarsDataframe, name: str) -> tuple[PolarsDataframe, dic
         data = data.rename({column: identifier})
     data = data.with_row_index(f'_{name}_id')
     return data, dict(columnlist)
-
-def fix[I](items: list[I], length: int) -> list[I]:
-    if len(items) < length:
-        return items + [items[-1]] * (length - len(items))
-    else: # assumes items can't be longer than length
-        return items
 
 def match(
         data1: PolarsDataframe,
