@@ -4,7 +4,7 @@ build-backend = "pdm.backend"
 
 [project]
 name = "textmatch"
-version = "1.1.0"
+version = "1.2.0"
 description = "Find fuzzy matches between datasets."
 readme = "README.md"
 requires-python = "== 3.14.*"
