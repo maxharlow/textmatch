@@ -457,7 +457,7 @@ def test_ignore_multiples6():
         'person': ['William SHAKESPEARE']
     }
 
-def test_methods_levenshtein():
+def test_methods_damerau_levenshtein():
     data1 = {
         'name': ['William Shakespeare', 'Anne Hathaway']
     }
@@ -468,7 +468,7 @@ def test_methods_levenshtein():
         data1,
         data2,
         matching=[
-            {'method': 'levenshtein'}
+            {'method': 'damerau-levenshtein'}
         ]
     )
     assert results.to_pydict() == {
@@ -476,7 +476,7 @@ def test_methods_levenshtein():
         'person': ['Will Sheikhspere', 'Ann Athawei']
     }
 
-def test_methods_levenshtein_no_matches():
+def test_methods_damerau_levenshtein_no_matches():
     data1 = {
         'name': ['Anne Hathaway', 'Christopher Marlowe']
     }
@@ -487,7 +487,7 @@ def test_methods_levenshtein_no_matches():
         data1,
         data2,
         matching=[
-            {'method': 'levenshtein'}
+            {'method': 'damerau-levenshtein'}
         ]
     )
     assert results.to_pydict() == {
@@ -495,7 +495,7 @@ def test_methods_levenshtein_no_matches():
         'person': []
     }
 
-def test_methods_levenshtein_fields():
+def test_methods_damerau_levenshtein_fields():
     data1 = {
         'name': ['William Shakespeare', 'Christopher Marlowe'],
         'address': ['Henley Street', 'Corpus Christi'],
@@ -515,7 +515,7 @@ def test_methods_levenshtein_fields():
                     {'1': 'name', '2': 'person'},
                     {'1': 'address', '2': 'location'}
                 ],
-                'method': 'levenshtein'
+                'method': 'damerau-levenshtein'
             }
         ]
     )
@@ -528,7 +528,7 @@ def test_methods_levenshtein_fields():
         'location': ['Henley Street']
     }
 
-def test_methods_jaro():
+def test_methods_jaro_winkler():
     data1 = {
         'name': ['William Shakespeare', 'Christopher Marlowe']
     }
@@ -539,7 +539,7 @@ def test_methods_jaro():
         data1,
         data2,
         matching=[
-            {'method': 'jaro'}
+            {'method': 'jaro-winkler'}
         ]
     )
     assert results.to_pydict() == {
@@ -547,7 +547,7 @@ def test_methods_jaro():
         'person': ['Willy Shake-Spear', 'Chris Barlow']
     }
 
-def test_methods_jaro_no_matches():
+def test_methods_jaro_winkler_no_matches():
     data1 = {
         'name': ['Anne Hathaway', 'Christopher Marlowe']
     }
@@ -558,7 +558,7 @@ def test_methods_jaro_no_matches():
         data1,
         data2,
         matching=[
-            {'method': 'jaro'}
+            {'method': 'jaro-winkler'}
         ]
     )
     assert results.to_pydict() == {
@@ -566,7 +566,7 @@ def test_methods_jaro_no_matches():
         'person': []
     }
 
-def test_methods_metaphone():
+def test_methods_double_metaphone():
     data1 = {
         'name': ['William Shakespeare', 'Anne Hathaway']
     }
@@ -577,7 +577,7 @@ def test_methods_metaphone():
         data1,
         data2,
         matching=[
-            {'method': 'metaphone'}
+            {'method': 'double-metaphone'}
         ]
     )
     assert results.to_pydict() == {
@@ -585,7 +585,7 @@ def test_methods_metaphone():
         'person': ['Ann Hathaweii']
     }
 
-def test_methods_metaphone_no_matches():
+def test_methods_double_metaphone_no_matches():
     data1 = {
         'name': ['Anne Hathaway', 'Christopher Marlowe']
     }
@@ -596,7 +596,7 @@ def test_methods_metaphone_no_matches():
         data1,
         data2,
         matching=[
-            {'method': 'metaphone'}
+            {'method': 'double-metaphone'}
         ]
     )
     assert results.to_pydict() == {
@@ -619,7 +619,7 @@ def test_methods_multiple1():
         matching=[
             {
                 'fields': [{'1': 'forename', '2': 'firstname'}],
-                'method': 'metaphone'
+                'method': 'double-metaphone'
             },
             {
                 'fields': [{'1': 'surname', '2': 'lastname'}],
@@ -660,7 +660,7 @@ def test_methods_multiple2():
                     {'1': 'forename', '2': 'firstname'},
                     {'1': 'surname', '2': 'lastname'}
                 ],
-                'method': 'levenshtein'
+                'method': 'damerau-levenshtein'
             }
         ]
     )
@@ -714,7 +714,7 @@ def test_output_pairwise():
                 'fields': [
                     {'1': 'Person Name', '2': 'person'}
                 ],
-                'method': 'levenshtein'
+                'method': 'damerau-levenshtein'
             }
         ],
         output=['1*', '2.death', 'degree']

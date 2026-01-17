@@ -60,16 +60,16 @@ def run(source1: Source,
             'name': 'Literal',
             'thresholded': False
         },
-        'levenshtein': {
-            'name': 'Levenshtein',
+        'damerau-levenshtein': {
+            'name': 'Damerau-Levenshtein',
             'thresholded': True
         },
-        'jaro': {
-            'name': 'Jaro',
+        'jaro-winkler': {
+            'name': 'Jaro-Winkler',
             'thresholded': True
         },
-        'metaphone': {
-            'name': 'Metaphone',
+        'double-metaphone': {
+            'name': 'Double Metaphone',
             'thresholded': False
         },
         'bilenko': {
@@ -77,6 +77,10 @@ def run(source1: Source,
             'thresholded': True
         }
     }
+    meta.update({
+        'edit': meta['damerau-levenshtein'],
+        'phonetic': meta['double-metaphone']
+    })
     if alert:
         for block in blocks:
             (index, fieldmap1, fieldmap2, ignoreset, method, threshold) = block
@@ -142,17 +146,17 @@ def match(
     match method:
         case 'literal':
             matches = match_apply(None, data1, data2, fieldmap1, fieldmap2, index, ticker)
-        case 'levenshtein':
-            from .methods import levenshtein
-            function = levenshtein.compare
+        case 'damerau-levenshtein' | 'edit':
+            from .methods import damerau_levenshtein
+            function = damerau_levenshtein.compare
             matches = match_compare(function, data1, data2, fieldmap1, fieldmap2, threshold, index, ticker)
-        case 'jaro':
-            from .methods import jaro
-            function = jaro.compare
+        case 'jaro-winkler':
+            from .methods import jaro_winkler
+            function = jaro_winkler.compare
             matches = match_compare(function, data1, data2, fieldmap1, fieldmap2, threshold, index, ticker)
-        case 'metaphone':
-            from .methods import metaphone
-            function = metaphone.apply
+        case 'double-metaphone' | 'phonetic':
+            from .methods import double_metaphone
+            function = double_metaphone.apply
             matches = match_apply_double(function, data1, data2, fieldmap1, fieldmap2, index, ticker)
         case 'bilenko':
             from .methods import bilenko

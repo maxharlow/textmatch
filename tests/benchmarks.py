@@ -51,7 +51,7 @@ def test_literal_ignore_case(benchmark):
         }]
     )
 
-def test_levenshtein(benchmark):
+def test_damerau_levenshtein(benchmark):
     specification = {
         'Person': 'name',
         'Office': 'company'
@@ -62,12 +62,12 @@ def test_levenshtein(benchmark):
         data1,
         data2,
         matching=[{
-            'method': 'levenshtein',
+            'method': 'damerau-levenshtein',
             'fields': [{'1': key, '2': key} for key in specification]
         }]
     )
 
-def test_metaphone(benchmark):
+def test_double_metaphone(benchmark):
     specification = {
         'Person': 'name',
         'Office': 'company'
@@ -78,7 +78,7 @@ def test_metaphone(benchmark):
         data1,
         data2,
         matching=[{
-            'method': 'metaphone',
+            'method': 'double-metaphone',
             'fields': [{'1': key, '2': key} for key in specification]
         }]
     )
@@ -99,7 +99,7 @@ def test_blocking(benchmark):
                 'fields': [{'1': key, '2': key} for key in specification]
             },
             {
-                'method': 'metaphone',
+                'method': 'double-metaphone',
                 'fields': [{'1': key, '2': key} for key in specification]
             }
         ]

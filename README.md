@@ -371,7 +371,7 @@ You can also include the matching degree number as a column by specifying it in 
 
 **`literal`** is the default – it matches strings exactly, after ignored characteristics have been taken into account.
 
-**`levenshtein`** Uses the [Damerau-Levenshtein](https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance) string distance metric that counts the number of changes that would have to be made to transform one string into another. Performs compared matching. Where two strings are of different lengths the longer string is used as the denominator for the threshold filter. Good at picking up typos and other small differences in spelling.
+**`damerau-levenshtein`** (alias **`edit`**) uses the [Damerau-Levenshtein](https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance) string distance metric that counts the number of changes that would have to be made to transform one string into another. Performs compared matching. Where two strings are of different lengths the longer string is used as the denominator for the threshold filter. Good at picking up typos and other small differences in spelling.
 
 <details>
   <summary>Example</summary>
@@ -383,7 +383,7 @@ You can also include the matching degree number as a column by specifying it in 
     matching=[
       {
         'fields': [{'1': 'name', '2': 'Person Name'}],
-        'method': 'levenshtein'
+        'method': 'damerau-levenshtein'
       }
     ]
   )
@@ -404,7 +404,7 @@ You can also include the matching degree number as a column by specifying it in 
   | Toby Esterhase    | Vienna   | Poorman   | Tony Esterhase    | Vienna         |
 </details>
 
-**`jaro`** uses the [Jaro-Winkler](https://en.wikipedia.org/wiki/Jaro–Winkler_distance) string distance metric that counts characters in common, though it considers differences near the start of the string to be more significant than differences near the end. Performs compared matching. It tends to work better than Levenshtein for shorter strings of text.
+**`jaro-winkler`** uses the [Jaro-Winkler](https://en.wikipedia.org/wiki/Jaro–Winkler_distance) string distance metric that counts characters in common, though it considers differences near the start of the string to be more significant than differences near the end. Performs compared matching. It tends to work better than Damerau-Levenshtein for shorter strings of text.
 
 <details>
   <summary>Example</summary>
@@ -416,13 +416,13 @@ You can also include the matching degree number as a column by specifying it in 
     matching=[
       {
         'fields': [{'1': 'name', '2': 'Person Name'}],
-        'method': 'jaro'
+        'method': 'jaro-winkler'
       }
     ]
   )
   ```
 
-  The resulting matches includes many more matches than `levenshtein`, though also many more false positives:
+  The resulting matches includes many more matches than Damerau-Levenshtein, though also many more false positives:
 
   | name              | place    | codename  | Person Name       | Location       |
   |-------------------|----------|-----------|-------------------|----------------|
@@ -445,7 +445,7 @@ You can also include the matching degree number as a column by specifying it in 
   | Connie Sachs      | Oxford   | none      | Konny Saks        | Oxford         |
 </details>
 
-**`metaphone`** uses the [Double Metaphone](https://en.wikipedia.org/wiki/Metaphone#Double_Metaphone) phonetic encoding algorithm to convert words into a representation of how they are pronounced. Performs applied matching. Tends to work better for data which has been transcribed or transliterated.
+**`double-metaphone`** (alias **`phonetic`**) uses the [Double Metaphone](https://en.wikipedia.org/wiki/Metaphone#Double_Metaphone) phonetic encoding algorithm to convert words into a representation of how they are pronounced. Performs applied matching. Tends to work better for data which has been transcribed or transliterated.
 
 <details>
   <summary>Example</summary>
@@ -457,7 +457,7 @@ You can also include the matching degree number as a column by specifying it in 
     matching=[
       {
         'fields': [{'1': 'name', '2': 'Person Name'}],
-        'method': 'metaphone'
+        'method': 'double-metaphone'
       }
     ]
   )
@@ -486,7 +486,7 @@ In a 'regular' match, you are really just matching using a single block. Each bl
 <details>
   <summary>Example</summary>
 
-  To specify a first block that does a case-insensitive literal match on surnames, then a second block performing a Levenshtein match on forenames:
+  To specify a first block that does a case-insensitive literal match on surnames, then a second block performing a Damerau-Levenshtein match on forenames:
 
   ```python
   textmatch.run(
@@ -501,7 +501,7 @@ In a 'regular' match, you are really just matching using a single block. Each bl
       {
           'fields': [{'1': 'name', '2': 'Person Name'}],
           'ignores': ['words-tailing'],
-          'method': 'levenshtein'
+          'method': 'damerau-levenshtein'
       }
     ]
   )
@@ -533,7 +533,7 @@ There are some special column definitions: `1*` and `2*` expand into all columns
     matching=[
       {
         'fields': [{'1': 'name', '2': 'Person Name'}],
-        'method': 'levenshtein'
+        'method': 'damerau-levenshtein'
       }
     ],
     output=['2*', '1.codename', 'degree']
