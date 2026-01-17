@@ -15,7 +15,7 @@ authors = [
 ]
 dependencies = [
     "polars[pyarrow,pandas] == 1.37.*",
-    "polars-distance == 0.5.*",
+    "polars-ds == 0.10.*",
     "colorama == 0.4.*",
     "unidecode == 1.4.*",
     "doublemetaphone == 1.2.*",

@@ -5,7 +5,7 @@
 groups = ["default", "lint", "test", "typecheck"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:08da2828cacac365d46d4094a374a93bad509e477f1f31253eb80acfbf8807e5"
+content_hash = "sha256:d5609be6491ecab9416c5f868ac97f0bcc2d7d321d24878be7c85c890c6f8b0e"
 
 [[metadata.targets]]
 requires_python = "==3.14.*"
@@ -332,25 +332,22 @@ files = [
 ]
 
 [[package]]
-name = "polars-distance"
-version = "0.5.3"
-requires_python = ">=3.8"
-summary = "Polars plugin for pairwise distance functions"
+name = "polars-ds"
+version = "0.10.4"
+requires_python = ">=3.9"
+summary = ""
 groups = ["default"]
 dependencies = [
-    "polars>=0.20.16",
+    "polars!=1.25,!=1.26,!=1.32.1,!=1.32.2,>=1.4.0",
+    "typing-extensions; python_version <= \"3.11\"",
 ]
 files = [
-    {file = "polars_distance-0.5.3-cp38-abi3-macosx_10_12_x86_64.whl", hash = "sha256:80c01b3210588987d917d85db2a0c12fb9ab5a71d6a7c519e318be139ef6ad5a"},
-    {file = "polars_distance-0.5.3-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:a47c033d1b9bcf376d8d15d74f0ad60bf98594fad08ca906c1f4b93907e19104"},
-    {file = "polars_distance-0.5.3-cp38-abi3-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:2bcf6f32ebf7b8efa258393ea58175abf5844379cc9acf239767927fe989aada"},
-    {file = "polars_distance-0.5.3-cp38-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:6c73567844fcf354b6e3387beb1253130d1fa09969100af5c51016f9e55f506d"},
-    {file = "polars_distance-0.5.3-cp38-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:21ca13be28d7a4e220a8a5d7276e6dfda6a507e799cfb714ac3c016bbcbd2ce9"},
-    {file = "polars_distance-0.5.3-cp38-abi3-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:bdfc5b840389a266e3b850a1320037c1a9419b0e58ab45dc01889dc8948870be"},
-    {file = "polars_distance-0.5.3-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:bbdba9190b1b34f1c609540ac0d2a34be3563fb6d0f751ad1e2ed916dbd7c6fb"},
-    {file = "polars_distance-0.5.3-cp38-abi3-win32.whl", hash = "sha256:59d21c12c4ef628f201ba7ed815015c1dcf0be842984275923fab03e89bfe02c"},
-    {file = "polars_distance-0.5.3-cp38-abi3-win_amd64.whl", hash = "sha256:48e90994ae0e7945572a6d70f7711cb2d9101ea338fa993488d405e7492ab389"},
-    {file = "polars_distance-0.5.3.tar.gz", hash = "sha256:26b7fbfc38de1c81b847ffa87b4f106dd10d4585a2240fff882e0f1fcb1acad8"},
+    {file = "polars_ds-0.10.4-cp39-abi3-macosx_10_12_x86_64.whl", hash = "sha256:6f6dde4e835129155d0386fcdd0aa6b603e305eaf60c78d7ee743c4897bb1547"},
+    {file = "polars_ds-0.10.4-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:1715b9aaef3e8f119eaf8d37cdc921c96350237edd1f3263d2d6e699b27c3e48"},
+    {file = "polars_ds-0.10.4-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a161647976ca012380013d17c447880806000e5adda414091245681138983dd7"},
+    {file = "polars_ds-0.10.4-cp39-abi3-manylinux_2_24_aarch64.whl", hash = "sha256:c2d0660d5cc69f694dcdd38638a474e9985dc66e47963efd9a0832cb91c786d3"},
+    {file = "polars_ds-0.10.4-cp39-abi3-win_amd64.whl", hash = "sha256:ead9870029d210d6ef54d2b2c6abc0dfe607f468fc3ef2d6a081b18fe552114c"},
+    {file = "polars_ds-0.10.4.tar.gz", hash = "sha256:e9d2db860bd84ad3891cda49caf6431387c43c4854ee2026138aedad49e794ad"},
 ]
 
 [[package]]
