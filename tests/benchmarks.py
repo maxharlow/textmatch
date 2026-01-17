@@ -67,6 +67,22 @@ def test_damerau_levenshtein(benchmark):
         }]
     )
 
+def test_jaro_winkler(benchmark):
+    specification = {
+        'Person': 'name',
+        'Office': 'company'
+    }
+    data1, data2 = mock(specification, 100)
+    benchmark(
+        textmatch.run,
+        data1,
+        data2,
+        matching=[{
+            'method': 'jaro-winkler',
+            'fields': [{'1': key, '2': key} for key in specification]
+        }]
+    )
+
 def test_double_metaphone(benchmark):
     specification = {
         'Person': 'name',
