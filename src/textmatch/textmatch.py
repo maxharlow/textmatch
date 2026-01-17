@@ -55,11 +55,34 @@ def run(source1: Source,
         fieldmap1 = {fields1[j]: header1[j] for j in range(len(fields1))}
         fieldmap2 = {fields2[j]: header2[j] for j in range(len(fields2))}
         blocks.append((i, fieldmap1, fieldmap2, ignores, method, threshold))
+    meta = {
+        'literal': {
+            'name': 'Literal',
+            'thresholded': False
+        },
+        'levenshtein': {
+            'name': 'Levenshtein',
+            'thresholded': True
+        },
+        'jaro': {
+            'name': 'Jaro',
+            'thresholded': True
+        },
+        'metaphone': {
+            'name': 'Metaphone',
+            'thresholded': False
+        },
+        'bilenko': {
+            'name': 'Bilenko',
+            'thresholded': True
+        }
+    }
     if alert:
         for block in blocks:
             (index, fieldmap1, fieldmap2, ignoreset, method, threshold) = block
             plan_index = f'({index + 1}) ' if len(blocks) > 1 else ''
-            plan_method = method.capitalize() + (f' {threshold}' if method in {'levenshtein', 'jaro', 'bilenko'} else '')
+            if method not in meta: raise Exception(f'{method}: method does not exist')
+            plan_method = meta[method]['name'] + (f' {threshold}' if meta[method]['thresholded'] else '')
             plan_ignore = ' – ignoring ' + ', '.join(ignoreset) if len(ignoreset) > 0 else ''
             plan_fields = ', '.join(f'"{a}" × "{b}"' for a, b in zip(fieldmap1.keys(), fieldmap2.keys()))
             alert(f'{plan_index}{plan_method} match{plan_ignore}: {plan_fields}')
