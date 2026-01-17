@@ -250,12 +250,12 @@ def match_compare(
         index: int,
         ticker: Ticker) -> PolarsDataframe:
     tick = ticker(4)
-    headerset1 = list(fieldmap1.values())
-    headerset2 = list(fieldmap2.values())
+    headerset1_ignorant = [f'_block{index}{header}_ignorant' for header in fieldmap1.values()]
+    headerset2_ignorant = [f'_block{index}{header}_ignorant' for header in fieldmap2.values()]
     data1_connector = f'_block{index}_data1_connector'
     data2_connector = f'_block{index}_data2_connector'
-    data1 = data1.with_columns(polars.concat_str([polars.col(header) for header in headerset1], separator='|').alias(data1_connector))
-    data2 = data2.with_columns(polars.concat_str([polars.col(header) for header in headerset2], separator='|').alias(data2_connector))
+    data1 = data1.with_columns(polars.concat_str([polars.col(header) for header in headerset1_ignorant], separator='|').alias(data1_connector))
+    data2 = data2.with_columns(polars.concat_str([polars.col(header) for header in headerset2_ignorant], separator='|').alias(data2_connector))
     block_degree = f'_block{index}_degree'
     if tick: tick()
     pairsets = []

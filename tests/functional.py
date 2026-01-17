@@ -528,6 +528,25 @@ def test_methods_damerau_levenshtein_fields():
         'location': ['Henley Street']
     }
 
+def test_methods_damerau_levenshtein_ignore_case():
+    data1 = {
+        'name': ['shakespeare']
+    }
+    data2 = {
+        'person': ['SHAKESPEARE']
+    }
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'method': 'damerau-levenshtein', 'ignores': ['case']}
+        ]
+    )
+    assert results.to_pydict() == {
+        'name': ['shakespeare'],
+        'person': ['SHAKESPEARE']
+    }
+
 def test_methods_jaro_winkler():
     data1 = {
         'name': ['William Shakespeare', 'Christopher Marlowe']
