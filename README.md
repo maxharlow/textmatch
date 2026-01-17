@@ -5,6 +5,8 @@ Find fuzzy matches between datasets.
 
 Fuzzy matching is the art and science of connecting up bits of information that are written differently but represent the same _thing_ – such as a person or company.
 
+See also: [CSV Match](https://github.com/maxharlow/csvmatch), a command-line tool based on Textmatch.
+
 
 Installing
 ----------
