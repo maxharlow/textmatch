@@ -406,6 +406,8 @@ You can also include the matching degree number as a column by specifying it in 
   | Toby Esterhase    | Vienna   | Poorman   | Tony Esterhase    | Vienna         |
 </details>
 
+**`ratcliff-obershelp`** uses the [Ratcliff-Obershelp](https://en.wikipedia.org/wiki/Gestalt_Pattern_Matching) algorithm. Performs compared matching.
+
 **`jaro-winkler`** uses the [Jaro-Winkler](https://en.wikipedia.org/wiki/Jaro–Winkler_distance) string distance metric that counts characters in common, though it considers differences near the start of the string to be more significant than differences near the end. Performs compared matching. It tends to work better than Damerau-Levenshtein for shorter strings of text.
 
 <details>

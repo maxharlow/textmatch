@@ -64,6 +64,10 @@ def run(source1: Source,
             'name': 'Damerau-Levenshtein',
             'thresholded': True
         },
+        'ratcliff-obershelp': {
+            'name': 'Ratcliff-Obershelp',
+            'thresholded': True
+        },
         'jaro-winkler': {
             'name': 'Jaro-Winkler',
             'thresholded': True
@@ -149,6 +153,10 @@ def match(
         case 'damerau-levenshtein' | 'edit':
             from .methods import damerau_levenshtein
             function = damerau_levenshtein.compare
+            matches = match_compare(function, data1, data2, fieldmap1, fieldmap2, threshold, index, ticker)
+        case 'ratcliff-obershelp':
+            from .methods import ratcliff_obershelp
+            function = ratcliff_obershelp.compare
             matches = match_compare(function, data1, data2, fieldmap1, fieldmap2, threshold, index, ticker)
         case 'jaro-winkler':
             from .methods import jaro_winkler
