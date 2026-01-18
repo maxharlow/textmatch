@@ -547,6 +547,25 @@ def test_methods_damerau_levenshtein_ignore_case():
         'person': ['SHAKESPEARE']
     }
 
+def test_methods_ratcliff_obershelp():
+    data1 = {
+        'name': ['William Shakespeare', 'Anne Hathaway']
+    }
+    data2 = {
+        'person': ['Ann Athawei', 'Will Sheikhspere']
+    }
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'method': 'ratcliff-obershelp'}
+        ]
+    )
+    assert results.to_pydict() == {
+        'name': ['William Shakespeare', 'Anne Hathaway'],
+        'person': ['Will Sheikhspere', 'Ann Athawei']
+    }
+
 def test_methods_jaro_winkler():
     data1 = {
         'name': ['William Shakespeare', 'Christopher Marlowe']
