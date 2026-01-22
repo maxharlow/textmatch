@@ -42,6 +42,7 @@ distribution = true
 linter = "ruff check"
 typechecker = "pyright"
 tests = "pytest tests/functional.py --verbose"
+memtest = "pytest tests/memory.py --verbose --capture=no"
 speed-benchmarks = "pytest tests/benchmarks.py --verbose --benchmark-group-by=name --benchmark-min-rounds=100 --benchmark-autosave --benchmark-compare"
 
 [tool.ruff.lint]
