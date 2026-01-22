@@ -267,9 +267,9 @@ def match_compare(
     block_degree = f'_block{index}_degree'
     if tick: tick()
     pairsets = []
-    for i in range(0, len(data1)):
-        pairset_index = f'_pairset{i}'
-        data2 = data2.with_columns(polars.lit(i, polars.UInt32).alias(pairset_index))
+    for data1_id in data1['_data1_id'].to_list():
+        pairset_index = f'_pairset{data1_id}'
+        data2 = data2.with_columns(polars.lit(data1_id, polars.UInt32).alias(pairset_index))
         pairset = data1.join(data2, left_on='_data1_id', right_on=pairset_index, how='inner')
         data2 = data2.drop(pairset_index)
         pairsets.append(pairset)

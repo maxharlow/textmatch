@@ -191,6 +191,30 @@ def test_blocks_simple():
         'first_name': ['William']
     }
 
+def test_blocks_with_filtered_ids():
+    data1 = {
+        'occupation': ['Playwright', 'Actor', 'Playwright', 'Poet', 'Playwright'],
+        'name': ['William Shakespeare', 'Richard Burbage', 'Christopher Marlowe', 'John Donne', 'Ben Jonson']
+    }
+    data2 = {
+        'role': ['Playwright', 'Playwright', 'Playwright', 'Playwright', 'Playwright'],
+        'person': ['William Shakespeare', 'Thomas Kyd', 'Christopher Marlowe', 'Francis Beaumont', 'Ben Jonson']
+    }
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'fields': [{'1': 'occupation', '2': 'role'}]},
+            {'fields': [{'1': 'name', '2': 'person'}]}
+        ]
+    )
+    assert results.to_pydict() == {
+        'occupation': ['Playwright', 'Playwright', 'Playwright'],
+        'name': ['William Shakespeare', 'Christopher Marlowe', 'Ben Jonson'],
+        'role': ['Playwright', 'Playwright', 'Playwright'],
+        'person': ['William Shakespeare', 'Christopher Marlowe', 'Ben Jonson']
+    }
+
 def test_ignore_case():
     data1 = {
         'name': ['Anne Hathaway', 'Christopher Marlowe']
