@@ -3,6 +3,7 @@ import importlib.resources
 import re
 import unidecode
 import polars
+import psutil
 
 from .typings import (
     PolarsDataframe,
@@ -153,15 +154,15 @@ def match(
         case 'damerau-levenshtein' | 'edit':
             from .methods import damerau_levenshtein
             function = damerau_levenshtein.compare
-            matches = match_compare(function, data1, data2, fieldmap1, fieldmap2, threshold, index, ticker)
+            matches = match_compare(function, data1, data2, fieldmap1, fieldmap2, threshold, index, ticker, alert)
         case 'ratcliff-obershelp':
             from .methods import ratcliff_obershelp
             function = ratcliff_obershelp.compare
-            matches = match_compare(function, data1, data2, fieldmap1, fieldmap2, threshold, index, ticker)
+            matches = match_compare(function, data1, data2, fieldmap1, fieldmap2, threshold, index, ticker, alert)
         case 'jaro-winkler':
             from .methods import jaro_winkler
             function = jaro_winkler.compare
-            matches = match_compare(function, data1, data2, fieldmap1, fieldmap2, threshold, index, ticker)
+            matches = match_compare(function, data1, data2, fieldmap1, fieldmap2, threshold, index, ticker, alert)
         case 'double-metaphone' | 'phonetic':
             from .methods import double_metaphone
             function = double_metaphone.apply
@@ -256,7 +257,14 @@ def match_compare(
         fieldmap2: dict[str, str],
         threshold: float,
         index: int,
-        ticker: Ticker) -> PolarsDataframe:
+        ticker: Ticker,
+        alert: Optional[Alert]) -> PolarsDataframe:
+    data1_size = data1.estimated_size()
+    data2_size = data2.estimated_size()
+    estimated_memory = (data1_size * len(data2)) + (data2_size * len(data1))
+    system_memory = psutil.virtual_memory().total
+    if estimated_memory > system_memory * 0.5:
+        if alert: alert(f'match block ({index + 1}) is estimated to use {estimated_memory / 1024**3:.1f}GB of memory, more than half the system memory ({system_memory / 1024**3:.1f}GB)'.replace('.0', ''), importance='warning')
     tick = ticker(4)
     headerset1_ignorant = [f'_block{index}{header}_ignorant' for header in fieldmap1.values()]
     headerset2_ignorant = [f'_block{index}{header}_ignorant' for header in fieldmap2.values()]

@@ -17,6 +17,7 @@ dependencies = [
     "polars[pyarrow,pandas] == 1.37.*",
     "polars-ds == 0.10.*",
     "colorama == 0.4.*",
+    "psutil == 6.1.*",
     "unidecode == 1.4.*",
     "doublemetaphone == 1.2.*",
     "dedupe == 3.0.*"
