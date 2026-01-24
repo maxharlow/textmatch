@@ -293,7 +293,7 @@ def test_ignore_nonlatin():
 
 def test_ignore_nonalpha():
     data1 = {
-        'name': ['William Shakespeare', 'Anne-Hathaway', 'Christopher Marlowe']
+        'name': ['William, Shakespeare', 'Anne-Hathaway', 'Christopher Marlowe']
     }
     data2 = {
         'person': ['Anne Hathaway!', 'William Shakespeare.']
@@ -306,7 +306,7 @@ def test_ignore_nonalpha():
         ]
     )
     assert results.to_pydict() == {
-        'name': ['William Shakespeare', 'Anne-Hathaway'],
+        'name': ['William, Shakespeare', 'Anne-Hathaway'],
         'person': ['William Shakespeare.', 'Anne Hathaway!']
     }
 
