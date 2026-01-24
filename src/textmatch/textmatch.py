@@ -326,7 +326,7 @@ def ignore_case(data: PolarsDataframe, header: str) -> PolarsDataframe:
 
 def ignore_nonalpha(data: PolarsDataframe, header: str) -> PolarsDataframe:
     regex = '[^a-zA-Z0-9]+'
-    return data.with_columns(polars.col(header).str.replace_all(regex, ''))
+    return data.with_columns(polars.col(header).str.replace_all(regex, ' ').str.strip_chars())
 
 def ignore_nonlatin(data: PolarsDataframe, header: str) -> PolarsDataframe:
     return data.with_columns(polars.col(header).map_elements(unidecode.unidecode, polars.String))
