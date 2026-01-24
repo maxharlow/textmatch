@@ -158,7 +158,7 @@ Combining different forms of ignorance can be quite powerful. The order in which
   | Sam Collins   | Vietnam | none      | Sam Collins   | Vietnam  |
 </details>
 
-**`nonalpha`** ignores anything that isn't a number or a letter.
+**`nonalpha`** ignores anything that isn't a number or a letter. Note that this includes whitespace, so `Daniel DeFoe` will match `Daniel De Foe`.
 
 <details>
   <summary>Example</summary>
