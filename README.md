@@ -21,45 +21,28 @@ The best way to approach fuzzy matching with Textmatch is to start with an exact
 
 The input datasets can be dataframes from [PyArrow](https://arrow.apache.org/docs/python), [Pandas](https://github.com/pandas-dev/pandas), or [Polars](https://github.com/pola-rs/polars). The output results will be in PyArrow format – which can then be converted to Pandas with `matches.to_pandas()`, or to Polars with `polars.from_arrow(matches)`.
 
+```python
+import textmatch
+```
+
 <details>
   <summary>Example</summary>
 
-  ```python
-  import textmatch
-  ```
-
   **`data1`**:
-  | name              | place    | codename  |
-  |-------------------|----------|-----------|
-  | Sam Collins       | Vietnam  | none      |
-  | Roy Bland         | London   | Soldier   |
-  | George Smiley     | London   | Beggerman |
-  | Bill Haydon       | London   | Tailor    |
-  | Perçy Allélíne    | London   | Tinker    |
-  | Kretzschmar       | Hamburg  | none      |
-  | Oliver Lacon      | London   | none      |
-  | Jim Prideaux      | Slovakia | none      |
-  | Peter Guillam Esq | Brixton  | none      |
-  | Toby Esterhase    | Vienna   | Poorman   |
-  | Connie Sachs      | Oxford   | none      |
+  | name           | codename  |
+  |----------------|-----------|
+  | Percy Alleline | Tinker    |
+  | Bill Haydon    | Tailor    |
+  | Roy Bland      | Soldier   |
+  | Toby Esterhase | Poorman   |
+  | George Smiley  | Beggerman |
 
   **`data2`**:
-  | Person Name                | Location       |
-  |----------------------------|----------------|
-  | Maria Andreyevna Ostrakova | Russia         |
-  | Konny Saks                 | Oxford         |
-  | Tony Esterhase             | Vienna         |
-  | Peter Guillam              | Brixton        |
-  | Mr Jim Prideaux            | Czech Republic |
-  | Lacon Oliver               | Cambridge      |
-  | Claus Kretzschmar          | Hamburg        |
-  | Richard Bland              | London         |
-  | Roy Rodgers                | Romania        |
-  | Percy Alleline             | London         |
-  | Bill-Haydon                | London         |
-  | George SMILEY              | London         |
-  | Roy Bland                  | UK             |
-  | Sam Collins                | Vietnam        |
+  | Person Name     | Alias   |
+  |-----------------|---------|
+  | Percy Alleline  | Chief   |
+  | Bill Haydon     | Tailor  |
+  | Howard Staunton | Control |
 
   To run an exact match on the **name** column from the first dataset against **Person Name** from the second:
 
@@ -73,12 +56,12 @@ The input datasets can be dataframes from [PyArrow](https://arrow.apache.org/doc
   )
   ```
 
-  The resulting matches include the two names which are written exactly the same:
+  This gives us matches for the two names which are in both datasets, despite the differences in the other column:
 
-  | name        | place   | codename | Person Name | Location |
-  |-------------|---------|----------|-------------|----------|
-  | Roy Bland   | London  | Soldier  | Roy Bland   | UK       |
-  | Sam Collins | Vietnam | none     | Sam Collins | Vietnam  |
+  | name           | codename | Person Name    | Alias  |
+  |----------------|----------|----------------|--------|
+  | Percy Alleline | Tinker   | Percy Alleline | Chief  |
+  | Bill Haydon    | Tailor   | Bill Haydon    | Tailor |
 
 </details>
 
@@ -101,7 +84,22 @@ Within each match block, the `fields` key defines which columns should be compar
 <details>
   <summary>Example</summary>
 
-  To match on the **name** and **place** columns from the first dataset against **Person Name** and **Location** from the second:
+  **`data1`**:
+  | name           | codename  |
+  |----------------|-----------|
+  | Percy Alleline | Tinker    |
+  | Bill Haydon    | Tailor    |
+  | Roy Bland      | Soldier   |
+  | Toby Esterhase | Poorman   |
+  | George Smiley  | Beggerman |
+
+  **`data2`**:
+  | Person Name    | Alias  |
+  |----------------|--------|
+  | Percy Alleline | Chief  |
+  | Bill Haydon    | Tailor |
+
+  To match on the **name** and **codename** columns from the first dataset against **Person Name** and **Alias** from the second:
 
   ```python
   textmatch.run(
@@ -111,18 +109,18 @@ Within each match block, the `fields` key defines which columns should be compar
       {
         'fields': [
           {'1': 'name', '2': 'Person Name'},
-          {'1': 'place', '2': 'Location'}
+          {'1': 'codename', '2': 'Alias'}
         ]
       }
     ]
   )
   ```
 
-  The resulting matches include the single name-place pair which is the same in both datasets:
+  This gives us a match in the single case where both columns from both datasets are the same:
 
-  | name        | place   | codename | Person Name | Location |
-  |-------------|---------|----------|-------------|----------|
-  | Sam Collins | Vietnam | none     | Sam Collins | Vietnam  |
+  | name        | codename | Person Name | Alias  |
+  |-------------|----------|-------------|--------|
+  | Bill Haydon | Tailor   | Bill Haydon | Tailor |
 </details>
 
 
@@ -135,6 +133,16 @@ Combining different forms of ignorance can be quite powerful. The order in which
 
 <details>
   <summary>Example</summary>
+
+  **`data1`**:
+  | name                 |
+  |----------------------|
+  | Florence Nightingale |
+
+  **`data2`**:
+  | Person Name          |
+  |----------------------|
+  | Florence NIGHTINGALE |
 
   ```python
   textmatch.run(
@@ -149,19 +157,29 @@ Combining different forms of ignorance can be quite powerful. The order in which
   )
   ```
 
-  The resulting matches include George Smiley, whose surname is in all-capitals in the second dataset:
+  This gives us a match despite the capitalised surname in the second dataset:
 
-  | name          | place   | codename  | Person Name   | Location |
-  |---------------|---------|-----------|---------------|----------|
-  | George Smiley | London  | Beggerman | George SMILEY | London   |
-  | Roy Bland     | London  | Soldier   | Roy Bland     | UK       |
-  | Sam Collins   | Vietnam | none      | Sam Collins   | Vietnam  |
+  | name                 | Person Name          |
+  |----------------------|----------------------|
+  | Florence Nightingale | Florence NIGHTINGALE |
 </details>
 
-**`nonalpha`** ignores anything that isn't a number or a letter. Note that this includes whitespace, so `Daniel DeFoe` will match `Daniel De Foe`.
+**`nonalpha`** ignores anything that isn't a number or a letter. Note that this includes whitespace.
 
 <details>
   <summary>Example</summary>
+
+  **`data1`**:
+  | name          |
+  |---------------|
+  | John Lennon   |
+  | Daniel DeFoe  |
+
+  **`data2`**:
+  | Person Name   |
+  |---------------|
+  | John-Lennon   |
+  | Daniel De Foe |
 
   ```python
   textmatch.run(
@@ -176,19 +194,32 @@ Combining different forms of ignorance can be quite powerful. The order in which
   )
   ```
 
-  The resulting matches include Bill Haydon, whose name is written with a hypen in the second dataset:
+  This gives us a match in the first case despite the hypen, and in the second case despite the space between the two parts of the surname:
 
-  | name        | place   | codename | Person Name | Location |
-  |-------------|---------|----------|-------------|----------|
-  | Bill Haydon | London  | Tailor   | Bill-Haydon | London   |
-  | Roy Bland   | London  | Soldier  | Roy Bland   | UK       |
-  | Sam Collins | Vietnam | none     | Sam Collins | Vietnam  |
+  | name          | Person Name   |
+  |---------------|---------------|
+  | John Lennon   | John-Lennon   |
+  | Daniel DeFoe | Daniel De Foe  |
 </details>
 
-**`nonlatin`** ignores non-Latin characters – so `Jérôme` will match `Jerome`, `Weiß` will match `Weiss`, and `Пушкин` will match `Pushkin`. The further the script is from the Latin alphabet, the less accurate this transliteration will be. You may also want to consider applying [Unicode normalisation](https://docs.python.org/3/library/unicodedata.html#unicodedata.normalize) beforehand.
+**`nonlatin`** ignores non-Latin characters. You may also want to consider applying [Unicode normalisation](https://docs.python.org/3/library/unicodedata.html#unicodedata.normalize) beforehand.
 
 <details>
   <summary>Example</summary>
+
+  **`data1`**:
+  | name             |
+  |------------------|
+  | Jérôme Bonaparte |
+  | Ehrich Weiß      |
+  | Александр Пушкин |
+
+  **`data2`**:
+  | Person Name       |
+  |-------------------|
+  | Jerome Bonaparte  |
+  | Ehrich Weiss      |
+  | Alexander Pushkin |
 
   ```python
   textmatch.run(
@@ -203,19 +234,32 @@ Combining different forms of ignorance can be quite powerful. The order in which
   )
   ```
 
-  The resulting matches include Percy Alleline, whose name is written with several diacritics in the first dataset:
+  This gives us a match despite the diacritics in the first case, matches `ß` to `ss` in the second, and transliterates in the last case. The further the script is from the Latin alphabet, the less accurate this transliteration will be.
 
-  | name             | place   | codename | Person Name    | Location |
-  |------------------|---------|----------|----------------|----------|
-  | Perçy Allélíne   | London  | Tinker   | Percy Alleline | London   |
-  | Roy Bland        | London  | Soldier  | Roy Bland      | UK       |
-  | Sam Collins      | Vietnam | none     | Sam Collins    | Vietnam  |
+  | name             | Person Name         |
+  |------------------|---------------------|
+  | Jérôme Bonaparte | Jerome Bonaparte    |
+  | Ehrich Weiß      | Ehrich Weiss        |
+  | Александр Пушкин | Alexander Pushkin   |
 </details>
 
 **`words-leading`** ignores all words except the last. This is useful for matching on surnames only.
 
 <details>
   <summary>Example</summary>
+
+  **`data1`**:
+  | name          |
+  |---------------|
+  | Boris Johnson |
+  | Mary Tudor    |
+
+  **`data2`**:
+  | Person Name                        |
+  |------------------------------------|
+  | Alexander Boris de Pfeffel Johnson |
+  | Elizabeth Tudor                    |
+
 
   ```python
   textmatch.run(
@@ -230,22 +274,28 @@ Combining different forms of ignorance can be quite powerful. The order in which
   )
   ```
 
-  The resulting matches include Toby and Tony Esterhase, Jim Prideaux and Mr Jim Prideaux, Kretzschmar and Claus Kretzschmar, as well as Roy and Richard Bland:
+  This gives us a match in the first case despite middle names being included, and in the second case gives us an erronious match between different people sharing a surname:
 
-  | name           |  place   | codename | Person Name       | Location       |
-  |----------------|----------|----------|-------------------|----------------|
-  | Toby Esterhase | Vienna   | Poorman  | Tony Esterhase    | Vienna         |
-  | Jim Prideaux   | Slovakia | none     | Mr Jim Prideaux   | Czech Republic |
-  | Kretzschmar    | Hamburg  | none     | Claus Kretzschmar | Hamburg        |
-  | Roy Bland      | London   | Soldier  | Richard Bland     | London         |
-  | Roy Bland      | London   | Soldier  | Roy Bland         | UK             |
-  | Sam Collins    | Vietnam  | none     | Sam Collins       | Vietnam        |
+  | name           | Person Name                        |
+  |----------------|------------------------------------|
+  | Boris Johnson  | Alexander Boris de Pfeffel Johnson |
+  | Mary Tudor     | Elizabeth Tudor                    |
 </details>
 
 **`words-tailing`** ignore all words except the first.
 
 <details>
   <summary>Example</summary>
+
+  **`data1`**:
+  | name         |
+  |--------------|
+  | Turing, Alan |
+
+  **`data2`**:
+  | Person Name           |
+  |-----------------------|
+  | Turing, Alan Mathison |
 
   ```python
   textmatch.run(
@@ -260,21 +310,27 @@ Combining different forms of ignorance can be quite powerful. The order in which
   )
   ```
 
-  The resulting matches include Peter Guillam Esq and Peter Guillam, Roy Bland and Roy Rodgers, as well as the two capitalisations of George Smiley:
+  This gives us a match in this example where surnames are listed first, despite middle names being included in the second dataset:
 
-  | name              | place   | codename  | Person Name   | Location |
-  |-------------------|---------|-----------|---------------|----------|
-  | Peter Guillam Esq | Brixton | none      | Peter Guillam | Brixton  |
-  | Roy Bland         | London  | Soldier   | Roy Rodgers   | Romania  |
-  | George Smiley     | London  | Beggerman | George SMILEY | London   |
-  | Roy Bland         | London  | Soldier   | Roy Bland     | UK       |
-  | Sam Collins       | Vietnam | none      | Sam Collins   | Vietnam  |
+  | name         | Person Name           |
+  |--------------|-----------------------|
+  | Turing, Alan | Turing, Alan Mathison |
 </details>
 
 **`words-order`** ignores the order in which the words are given. This is useful for matching names given surname-first with those given forename-first.
 
 <details>
   <summary>Example</summary>
+
+  **`data1`**:
+  | name       |
+  |------------|
+  | Mao Zedong |
+
+  **`data2`**:
+  | Person Name |
+  |-------------|
+  | Zedong Mao  |
 
   ```python
   textmatch.run(
@@ -289,19 +345,29 @@ Combining different forms of ignorance can be quite powerful. The order in which
   )
   ```
 
-  The resulting matches include Oliver Lacon, whose name is written surname-first in the second dataset:
+  This gives us a match despite the name order difference:
 
-  | name         | place   | codename | Person Name  | Location  |
-  |--------------|---------|----------|--------------|-----------|
-  | Oliver Lacon | London  | none     | Lacon Oliver | Cambridge |
-  | Roy Bland    | London  | Soldier  | Roy Bland    | UK        |
-  | Sam Collins  | Vietnam | none     | Sam Collins  | Vietnam   |
+  | name       | Person Name |
+  |------------|-------------|
+  | Mao Zedong | Zedong Mao  |
 </details>
 
 **`titles`** ignores common English name prefixes such as Mr and Ms. There is a full list of these titles [here](https://github.com/maxharlow/textmatch/blob/main/src/textmatch/ignored-titles.txt).
 
 <details>
   <summary>Example</summary>
+
+  **`data1`**:
+  | name                  |
+  |-----------------------|
+  | Issac Newton          |
+  | Sir Alexander Fleming |
+
+  **`data2`**:
+  | Person Name          |
+  |----------------------|
+  | Sir Issac Newton     |
+  | Dr Alexander Fleming |
 
   ```python
   textmatch.run(
@@ -316,13 +382,12 @@ Combining different forms of ignorance can be quite powerful. The order in which
   )
   ```
 
-  The resulting matches include Jim Prideaux, who has the title 'Mr' in the second dataset:
+  This gives us matches despite there being no title in the first case, and the titles differing in the second case:
 
-  | name         | place    | codename | Person Name     | Location       |
-  |--------------|----------|----------|-----------------|----------------|
-  | Jim Prideaux | Slovakia | none     | Mr Jim Prideaux | Czech Republic |
-  | Roy Bland    | London   | Soldier  | Roy Bland       | UK             |
-  | Sam Collins  | Vietnam  | none     | Sam Collins     | Vietnam        |
+  | name                  | Person Name          |
+  |-----------------------|----------------------|
+  | Issac Newton          | Sir Issac Newton     |
+  | Sir Alexander Fleming | Dr Alexander Fleming |
 </details>
 
 **`regex`** ignores terms specific to your data using a given regular expression. This is specified inline: `regex=EXPRESSION`.
@@ -330,7 +395,17 @@ Combining different forms of ignorance can be quite powerful. The order in which
 <details>
   <summary>Example</summary>
 
-  To use the regular expression ` Esq$` to ignore the word 'Esq' where it appear at the end of a value:
+  **`data1`**:
+  | name      |
+  |-----------|
+  | Liz Truss |
+
+  **`data2`**:
+  | Person Name  |
+  |--------------|
+  | Liz Truss MP |
+
+  To use the regular expression ` MP$` to ignore the word 'MP' where it appear at the end of a value:
 
   ```python
   textmatch.run(
@@ -339,19 +414,17 @@ Combining different forms of ignorance can be quite powerful. The order in which
     matching=[
       {
         'fields': [{'1': 'name', '2': 'Person Name'}],
-        'ignores': ['regex= Esq$']
+        'ignores': ['regex= MP$']
       }
     ]
   )
   ```
 
-  The resulting matches include Peter Guillam, who has the name suffix 'Esq' in the first dataset:
+  This gives us a match despite the MP suffix:
 
-  | name              | place   | codename | Person Name   | Location |
-  |-------------------|---------|----------|---------------|----------|
-  | Peter Guillam Esq | Brixton | none     | Peter Guillam | Brixton  |
-  | Roy Bland         | London  | Soldier  | Roy Bland     | UK       |
-  | Sam Collins       | Vietnam | none     | Sam Collins   | Vietnam  |
+  | name         | Person Name  |
+  |--------------|--------------|
+  | Liz Truss    | Liz Truss MP |
 </details>
 
 ### Match methods & thresholds
@@ -366,17 +439,31 @@ There are three different categories of method:
 
 For those matching methods that generate a matching degree number there is then a threshold filter for any two records to be considered to be a match – you can adjust this with the `threshold` key, which accepts a number between 0.0 and 1.0, defaulting to 0.6.
 
-You can also include the matching degree number as a column by specifying it in the [outputs](#outputs).
+You can also include the matching degree number as a column by specifying it in the [output](#outputs).
 
 > [!WARNING]
 > When working with names of people, exact matches, even when other pieces of information such as birthdays are included, are not a guarantee that the two names actually refer to the same human. Furthermore, the chance of a mismatch is unintuitively high – as illustrated by [the birthday paradox](https://pudding.cool/2018/04/birthday-paradox/).
 
 **`literal`** is the default – it matches strings exactly, after ignored characteristics have been taken into account.
 
-**`damerau-levenshtein`** (alias **`edit`**) uses the [Damerau-Levenshtein](https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance) string distance metric that counts the number of changes that would have to be made to transform one string into another. Performs compared matching. Where two strings are of different lengths the longer string is used as the denominator for the threshold filter. Good at picking up typos and other small differences in spelling.
+[**`damerau-levenshtein`**](https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance) (alias **`edit`**) counts the number of insertions, deletions, substitutions, and transpositions that would be required to transform one string into another. It is good at picking up typos and other small differences in spelling. Performs compared matching.
 
 <details>
   <summary>Example</summary>
+
+  **`data1`**:
+  | name              |
+  |-------------------|
+  | Edmund Hillary    |
+  | T. E. Lawrence    |
+  | George Washington |
+
+  **`data2`**:
+  | Person Name            |
+  |------------------------|
+  | Edmund P. Hilly        |
+  | Thomas Edward Lawrence |
+  | Denzel Washington      |
 
   ```python
   textmatch.run(
@@ -385,33 +472,39 @@ You can also include the matching degree number as a column by specifying it in 
     matching=[
       {
         'fields': [{'1': 'name', '2': 'Person Name'}],
-        'method': 'damerau-levenshtein'
+        'method': 'damerau-levenshtein',
       }
-    ]
+    ],
+    output=['1*', '2*', 'degree']
   )
   ```
 
-  The resulting matches include various names with small typographical differences, though the most emblematic of this matching method would be Toby and Tony Esterhase:
+  This gives us a 66.7% match for Hillary despite the inclusion of a middle initial and misspelling of the surname. The two other examples show some problems with this approach. Lawrence doesn't appear as a 55% match doesn't meet the threshold despite them looking like the same person. Conversely, Washington does appear at a 71% match, despite them certainly not being the same person:
 
-  | name              | place    | codename  | Person Name       | Location       |
-  |-------------------|----------|-----------|-------------------|----------------|
-  | Sam Collins       | Vietnam  | none      | Sam Collins       | Vietnam        |
-  | Roy Bland         | London   | Soldier   | Roy Bland         | UK             |
-  | George Smiley     | London   | Beggerman | George SMILEY     | London         |
-  | Bill Haydon       | London   | Tailor    | Bill-Haydon       | London         |
-  | Perçy Allélíne    | London   | Tinker    | Percy Alleline    | London         |
-  | Kretzschmar       | Hamburg  | none      | Claus Kretzschmar | Hamburg        |
-  | Jim Prideaux      | Slovakia | none      | Mr Jim Prideaux   | Czech Republic |
-  | Peter Guillam Esq | Brixton  | none      | Peter Guillam     | Brixton        |
-  | Toby Esterhase    | Vienna   | Poorman   | Tony Esterhase    | Vienna         |
+  | name              | Person Name       | degree    |
+  |-------------------|-------------------|-----------|
+  | Edmund Hillary    | Edmund P. Hilly   | 0.6666667 |
+  | George Washington | Denzel Washington | 0.7058824 |
 </details>
 
-**`ratcliff-obershelp`** uses the [Ratcliff-Obershelp](https://en.wikipedia.org/wiki/Gestalt_Pattern_Matching) algorithm. Performs compared matching.
-
-**`jaro-winkler`** uses the [Jaro-Winkler](https://en.wikipedia.org/wiki/Jaro–Winkler_distance) string distance metric that counts characters in common, though it considers differences near the start of the string to be more significant than differences near the end. Performs compared matching. It tends to work better than Damerau-Levenshtein for shorter strings of text.
+[**`ratcliff-obershelp`**](https://en.wikipedia.org/wiki/Gestalt_pattern_matching) first looks for the longest common substring between the two. It then looks either side of that substring for further common substrings, and so on recursively. The final score is the sum of the lengths of all common substrings divided by the sum of the lengths of the two strings. Performs compared matching.
 
 <details>
   <summary>Example</summary>
+
+  **`data1`**:
+  | name              |
+  |-------------------|
+  | Edmund Hillary    |
+  | T. E. Lawrence    |
+  | George Washington |
+
+  **`data2`**:
+  | Person Name            |
+  |------------------------|
+  | Edmund P. Hilly        |
+  | Thomas Edward Lawrence |
+  | Denzel Washington      |
 
   ```python
   textmatch.run(
@@ -420,39 +513,38 @@ You can also include the matching degree number as a column by specifying it in 
     matching=[
       {
         'fields': [{'1': 'name', '2': 'Person Name'}],
-        'method': 'jaro-winkler'
+        'method': 'ratcliff-obershelp',
       }
-    ]
+    ],
+    output=['1*', '2*', 'degree']
   )
   ```
 
-  The resulting matches includes many more matches than Damerau-Levenshtein, though also many more false positives:
+  This gives us a good match for Hilary and Lawrence, although we still have an erronious match for Washington:
 
-  | name              | place    | codename  | Person Name       | Location       |
-  |-------------------|----------|-----------|-------------------|----------------|
-  | Sam Collins       | Vietnam  | none      | Percy Alleline    | London         |
-  | Sam Collins       | Vietnam  | none      | Sam Collins       | Vietnam        |
-  | Roy Bland         | London   | Soldier   | Richard Bland     | London         |
-  | Roy Bland         | London   | Soldier   | Roy Rodgers       | Romania        |
-  | Roy Bland         | London   | Soldier   | Bill-Haydon       | London         |
-  | Roy Bland         | London   | Soldier   | Roy Bland         | UK             |
-  | George Smiley     | London   | Beggerman | George SMILEY     | London         |
-  | Bill Haydon       | London   | Tailor    | Bill-Haydon       | London         |
-  | Bill Haydon       | London   | Tailor    | Roy Bland         | UK             |
-  | Perçy Allélíne    | London   | Tinker    | Peter Guillam     | Brixton        |
-  | Perçy Allélíne    | London   | Tinker    | Percy Alleline    | London         |
-  | Kretzschmar       | Hamburg  | none      | Claus Kretzschmar | Hamburg        |
-  | Jim Prideaux      | Slovakia | none      | Mr Jim Prideaux   | Czech Republic |
-  | Peter Guillam Esq | Brixton  | none      | Peter Guillam     | Brixton        |
-  | Toby Esterhase    | Vienna   | Poorman   | Tony Esterhase    | Vienna         |
-  | Toby Esterhase    | Vienna   | Poorman   | Roy Rodgers       | Romania        |
-  | Connie Sachs      | Oxford   | none      | Konny Saks        | Oxford         |
+  | name              | Person Name            | degree     |
+  |-------------------|------------------------|------------|
+  | Edmund Hillary    | Edmund P. Hilly        | 0.82758623 |
+  | T. E. Lawrence    | Thomas Edward Lawrence | 0.6666667  |
+  | George Washington | Denzel Washington      | 0.7647059  |
 </details>
 
-**`double-metaphone`** (alias **`phonetic`**) uses the [Double Metaphone](https://en.wikipedia.org/wiki/Metaphone#Double_Metaphone) phonetic encoding algorithm to convert words into a representation of how they are pronounced. Performs applied matching. Tends to work better for data which has been transcribed or transliterated.
+[**`jaro-winkler`**](https://en.wikipedia.org/wiki/Jaro–Winkler_distance) counts characters in common between the two strings, though it considers differences near the start of the string to be more significant than differences near the end. Performs compared matching.
+
+[**`double-metaphone`**](https://en.wikipedia.org/wiki/Metaphone#Double_Metaphone) (alias **`phonetic`**) converts the words in each string into a representation of how they are pronounced. Tends to work well for data which has been transcribed or transliterated. Performs applied matching.
 
 <details>
   <summary>Example</summary>
+
+  **`data1`**:
+  | name            |
+  |-----------------|
+  | Joaquin Phoenix |
+
+  **`data2`**:
+  | Person Name   |
+  |---------------|
+  | Wakeen Feenix |
 
   ```python
   textmatch.run(
@@ -463,18 +555,16 @@ You can also include the matching degree number as a column by specifying it in 
         'fields': [{'1': 'name', '2': 'Person Name'}],
         'method': 'double-metaphone'
       }
-    ]
+    ],
+    output=['1*', '2*', 'degree']
   )
   ```
 
-  The resulting matches includes those with nonalphanumeric differences, as well as Connie Sachs and Konny Saks, names written quite differently that would be pronounced the same:
+  This gives us a match that we would not have got with other methods:
 
-  | name          | place   | codename  | Person Name   | Location |
-  |---------------|---------|-----------|---------------|----------|
-  | Connie Sachs  | Oxford  | none      | Konny Saks    | Oxford   |
-  | Roy Bland     | London  | Soldier   | Roy Bland     | UK       |
-  | George Smiley | London  | Beggerman | George SMILEY | London   |
-  | Sam Collins   | Vietnam | none      | Sam Collins   | Vietnam  |
+  | name            | Person Name   | degree |
+  |-----------------|---------------|--------|
+  | Joaquin Phoenix | Wakeen Feenix | 1.0    |
 </details>
 
 **`bilenko`** uses [Dedupe](https://github.com/dedupeio/dedupe), a library built by Forest Gregg and Derek Eder based on the work of Mikhail Bilenko that will ask you to train it by asking whether different pairs of records should match. The information you give it is then extrapolated to match up the rest of the dataset. The more examples you give it, the better the results will be. At minimum, try to provide 10 positive matches and 10 negative matches. Performs custom matching.
@@ -489,6 +579,17 @@ In a 'regular' match, you are really just matching using a single block. Each bl
 
 <details>
   <summary>Example</summary>
+
+  **`data1`**:
+  | name            |
+  |-----------------|
+  | Tim Berners-Lee |
+
+  **`data2`**:
+  | Person Name      |
+  |------------------|
+  | Time BERNERS-LEE |
+  | Tim Berners-Leed |
 
   To specify a first block that does a case-insensitive literal match on surnames, then a second block performing a Damerau-Levenshtein match on forenames:
 
@@ -507,16 +608,16 @@ In a 'regular' match, you are really just matching using a single block. Each bl
           'ignores': ['words-tailing'],
           'method': 'damerau-levenshtein'
       }
-    ]
+    ],
+    output=['1*', '2*', 'degree']
   )
   ```
 
-  |     name      |  place  | codename  |    Person Name    | Location |
-  |---------------|---------|-----------|-------------------|----------|
-  | Kretzschmar   | Hamburg | none      | Claus Kretzschmar | Hamburg  |
-  | George Smiley | London  | Beggerman | George SMILEY     | London   |
-  | Roy Bland     | London  | Soldier   | Roy Bland         | UK       |
-  | Sam Collins   | Vietnam | none      | Sam Collins       | Vietnam  |
+  The first block matches the capitalised surname 100% after ignoring the case, then the second block runs a Damerau-Levenshtein match on the forename, which matches 75%:
+
+  | name            | Person Name      | degree    |
+  |-----------------|------------------|-----------|
+  | Tim Berners-Lee | Time BERNERS-LEE | 0.75; 1.0 |
 </details>
 
 ### Outputs
@@ -528,7 +629,23 @@ There are some special column definitions: `1*` and `2*` expand into all columns
 <details>
   <summary>Example</summary>
 
-  To include every column from the second dataset, followed by the **codename** column from the first, followed by the matching degree:
+  **`data1`**:
+  | name           | codename  |
+  |----------------|-----------|
+  | Percy Alleline | Tinker    |
+  | Bill Haydon    | Tailor    |
+  | Roy Bland      | Soldier   |
+  | Toby Esterhase | Poorman   |
+  | George Smiley  | Beggerman |
+
+  **`data2`**:
+  | Person Name      | Alias   | Location |
+  |------------------|---------|----------|
+  | Perci Alleline   | Chief   | London   |
+  | Bill Haydon      | Tailor  | London   |
+  | Howhard Staunton | Control | Unknown  |
+
+  To output the **codename** column from the first dataset, followed by every column from the second dataset, followed by the matching degree:
 
   ```python
   textmatch.run(
@@ -540,21 +657,14 @@ There are some special column definitions: `1*` and `2*` expand into all columns
         'method': 'damerau-levenshtein'
       }
     ],
-    output=['2*', '1.codename', 'degree']
+    output=['1.codename', '2*', 'degree']
   )
   ```
 
-  | Person Name       | Location       | codename  | degree     |
-  |-------------------|----------------|-----------|------------|
-  | Sam Collins       | Vietnam        | none      | 1.0        |
-  | Roy Bland         | UK             | Soldier   | 1.0        |
-  | George SMILEY     | London         | Beggerman | 0.61538464 |
-  | Bill-Haydon       | London         | Tailor    | 0.90909094 |
-  | Percy Alleline    | London         | Tinker    | 0.78571427 |
-  | Claus Kretzschmar | Hamburg        | none      | 0.64705884 |
-  | Mr Jim Prideaux   | Czech Republic | none      | 0.8        |
-  | Peter Guillam     | Brixton        | none      | 0.7647059  |
-  | Tony Esterhase    | Vienna         | Poorman   | 0.9285714  |
+  | codename | Person Name    | Alias  | Location | degree     |
+  |----------|----------------|--------|----------|------------|
+  | Tinker   | Perci Alleline | Chief  | London   | 0.9285714  |
+  | Tailor   | Bill Haydon    | Tailor | London   | 1.0        |
 </details>
 
 ### Join types
@@ -563,6 +673,22 @@ The `join` argument takes a string that indicates what other nonmatching records
 
 <details>
   <summary>Example</summary>
+
+  **`data1`**:
+  | name           | codename  |
+  |----------------|-----------|
+  | Percy Alleline | Tinker    |
+  | Bill Haydon    | Tailor    |
+  | Roy Bland      | Soldier   |
+  | Toby Esterhase | Poorman   |
+  | George Smiley  | Beggerman |
+
+  **`data2`**:
+  | Person Name      | Alias   | Location |
+  |------------------|---------|----------|
+  | Perci Alleline   | Chief   | London   |
+  | Bill Haydon      | Tailor  | London   |
+  | Howhard Staunton | Control | Unknown  |
 
   To include all rows from the first dataset, but only those that match from the second:
 
@@ -577,19 +703,13 @@ The `join` argument takes a string that indicates what other nonmatching records
   )
   ```
 
-  | name              | place    | codename  | Person Name | Location |
-  |-------------------|----------|-----------|-------------|----------|
-  | Roy Bland         | London   | Soldier   | Roy Bland   | UK       |
-  | Sam Collins       | Vietnam  | none      | Sam Collins | Vietnam  |
-  | George Smiley     | London   | Beggerman |             |          |
-  | Bill Haydon       | London   | Tailor    |             |          |
-  | Perçy Allélíne    | London   | Tinker    |             |          |
-  | Kretzschmar       | Hamburg  | none      |             |          |
-  | Oliver Lacon      | London   | none      |             |          |
-  | Jim Prideaux      | Slovakia | none      |             |          |
-  | Peter Guillam Esq | Brixton  | none      |             |          |
-  | Toby Esterhase    | Vienna   | Poorman   |             |          |
-  | Connie Sachs      | Oxford   | none      |             |          |
+  | name           | codename  | Person Name | Alias  | Location |
+  |----------------|-----------|-------------|--------|----------|
+  | Bill Haydon    | Tailor    | Bill Haydon | Tailor | London   │
+  | Percy Alleline | Tinker    |             |        |          │
+  | Roy Bland      | Solder    |             |        |          │
+  | Toby Esterhase | Poorman   |             |        |          │
+  | George Smiley  | Beggarman |             |        |          │
 </details>
 
 
