@@ -274,10 +274,10 @@ def test_ignore_titles():
 
 def test_ignore_nonlatin():
     data1 = {
-        'name': ['Charlotte Brontë', 'Gabriel García Márquez']
+        'name': ['Charlotte Brontë', 'Gabriel García Márquez', 'Владимир Ленин']
     }
     data2 = {
-        'person': ['Gabriel Garcia Marquez', 'Leo Tolstoy']
+        'person': ['Gabriel Garcia Marquez', 'Leo Tolstoy', 'Vladimir Lenin']
     }
     results = textmatch.run(
         data1,
@@ -287,8 +287,8 @@ def test_ignore_nonlatin():
         ]
     )
     assert results.to_pydict() == {
-        'name': ['Gabriel García Márquez'],
-        'person': ['Gabriel Garcia Marquez']
+        'name': ['Gabriel García Márquez', 'Владимир Ленин'],
+        'person': ['Gabriel Garcia Marquez', 'Vladimir Lenin']
     }
 
 def test_ignore_nonalpha():
