@@ -202,7 +202,7 @@ Combining different forms of ignorance can be quite powerful. The order in which
   | Daniel DeFoe | Daniel De Foe  |
 </details>
 
-**`nonlatin`** ignores non-Latin characters. You may also want to consider applying [Unicode normalisation](https://docs.python.org/3/library/unicodedata.html#unicodedata.normalize) beforehand.
+**`nonlatin`** ignores non-Latin characters. This covers both [Unicode normalisation](https://en.wikipedia.org/wiki/Unicode_equivalence), where characters look the same but technically are not, and transliteration, where words are written in an alternative alphabet.
 
 <details>
   <summary>Example</summary>
