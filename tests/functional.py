@@ -590,6 +590,63 @@ def test_methods_ratcliff_obershelp():
         'person': ['Will Sheikhspere', 'Ann Athawei']
     }
 
+def test_methods_partial_ratcliff_obershelp():
+    data1 = {
+        'name': ['Shakespeare', 'William Wordsworth']
+    }
+    data2 = {
+        'person': ['William Shakespeare']
+    }
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'method': 'partial-ratcliff-obershelp'}
+        ]
+    )
+    assert results.to_pydict() == {
+        'name': ['Shakespeare'],
+        'person': ['William Shakespeare']
+    }
+
+def test_methods_tokenset_ratcliff_obershelp():
+    data1 = {
+        'name': ['William Shakespeare']
+    }
+    data2 = {
+        'person': ['The playwright known as Shakespeare, William']
+    }
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'method': 'tokenset-ratcliff-obershelp'}
+        ]
+    )
+    assert results.to_pydict() == {
+        'name': ['William Shakespeare'],
+        'person': ['The playwright known as Shakespeare, William']
+    }
+
+def test_methods_tokenset_partial_ratcliff_obershelp():
+    data1 = {
+        'name': ['William Shakespeare']
+    }
+    data2 = {
+        'person': ['William - the playwright known as Shakspere']
+    }
+    results = textmatch.run(
+        data1,
+        data2,
+        matching=[
+            {'method': 'tokenset-partial-ratcliff-obershelp'}
+        ]
+    )
+    assert results.to_pydict() == {
+        'name': ['William Shakespeare'],
+        'person': ['William - the playwright known as Shakspere']
+    }
+
 def test_methods_jaro_winkler():
     data1 = {
         'name': ['William Shakespeare', 'Christopher Marlowe']

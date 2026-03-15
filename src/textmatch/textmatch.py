@@ -69,6 +69,18 @@ def run(source1: Source,
             'name': 'Ratcliff-Obershelp',
             'thresholded': True
         },
+        'partial-ratcliff-obershelp': {
+            'name': 'Partial Ratcliff-Obershelp',
+            'thresholded': True
+        },
+        'tokenset-ratcliff-obershelp': {
+            'name': 'Tokenset Ratcliff-Obershelp',
+            'thresholded': True
+        },
+        'tokenset-partial-ratcliff-obershelp': {
+            'name': 'Tokenset Partial Ratcliff-Obershelp',
+            'thresholded': True
+        },
         'jaro-winkler': {
             'name': 'Jaro-Winkler',
             'thresholded': True
@@ -158,6 +170,18 @@ def match(
         case 'ratcliff-obershelp':
             from .methods import ratcliff_obershelp
             function = ratcliff_obershelp.compare
+            matches = match_compare(function, data1, data2, fieldmap1, fieldmap2, threshold, index, ticker, alert)
+        case 'partial-ratcliff-obershelp':
+            from .methods import partial_ratcliff_obershelp
+            function = partial_ratcliff_obershelp.compare
+            matches = match_compare(function, data1, data2, fieldmap1, fieldmap2, threshold, index, ticker, alert)
+        case 'tokenset-ratcliff-obershelp':
+            from .methods import tokenset_ratcliff_obershelp
+            function = tokenset_ratcliff_obershelp.compare
+            matches = match_compare(function, data1, data2, fieldmap1, fieldmap2, threshold, index, ticker, alert)
+        case 'tokenset-partial-ratcliff-obershelp':
+            from .methods import tokenset_partial_ratcliff_obershelp
+            function = tokenset_partial_ratcliff_obershelp.compare
             matches = match_compare(function, data1, data2, fieldmap1, fieldmap2, threshold, index, ticker, alert)
         case 'jaro-winkler':
             from .methods import jaro_winkler

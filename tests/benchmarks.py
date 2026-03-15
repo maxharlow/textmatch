@@ -83,6 +83,54 @@ def test_ratcliff_obershelp(benchmark):
         }]
     )
 
+def test_partial_ratcliff_obershelp(benchmark):
+    specification = {
+        'Person': 'name',
+        'Office': 'company'
+    }
+    data1, data2 = mock(specification, 100)
+    benchmark(
+        textmatch.run,
+        data1,
+        data2,
+        matching=[{
+            'method': 'partial-ratcliff-obershelp',
+            'fields': [{'1': key, '2': key} for key in specification]
+        }]
+    )
+
+def test_tokenset_ratcliff_obershelp(benchmark):
+    specification = {
+        'Person': 'name',
+        'Office': 'company'
+    }
+    data1, data2 = mock(specification, 100)
+    benchmark(
+        textmatch.run,
+        data1,
+        data2,
+        matching=[{
+            'method': 'tokenset-ratcliff-obershelp',
+            'fields': [{'1': key, '2': key} for key in specification]
+        }]
+    )
+
+def test_tokenset_partial_ratcliff_obershelp(benchmark):
+    specification = {
+        'Person': 'name',
+        'Office': 'company'
+    }
+    data1, data2 = mock(specification, 100)
+    benchmark(
+        textmatch.run,
+        data1,
+        data2,
+        matching=[{
+            'method': 'tokenset-partial-ratcliff-obershelp',
+            'fields': [{'1': key, '2': key} for key in specification]
+        }]
+    )
+
 def test_jaro_winkler(benchmark):
     specification = {
         'Person': 'name',

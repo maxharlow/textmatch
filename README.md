@@ -455,15 +455,17 @@ You can also include the matching degree number as a column by specifying it in 
   | name              |
   |-------------------|
   | Edmund Hillary    |
+  | Francis Drake     |
   | T. E. Lawrence    |
   | George Washington |
 
   **`data2`**:
-  | Person Name            |
-  |------------------------|
-  | Edmund P. Hilly        |
-  | Thomas Edward Lawrence |
-  | Denzel Washington      |
+  | Person Name                  |
+  |------------------------------|
+  | Edmund P. Hilly              |
+  | Alison Drake                 |
+  | Thomas Edward Lawrence       |
+  | Denzel Washington            |
 
   ```python
   textmatch.run(
@@ -479,7 +481,7 @@ You can also include the matching degree number as a column by specifying it in 
   )
   ```
 
-  This gives us a 66.7% match for Hillary despite the inclusion of a middle initial and misspelling of the surname. The two other examples show some problems with this approach. Lawrence doesn't appear as a 55% match doesn't meet the threshold despite them looking like the same person. Conversely, Washington does appear at a 71% match, despite them certainly not being the same person:
+  This gives us a 66.7% match for Hillary despite the inclusion of a middle initial and misspelling of the surname. We also accurately avoid matching the two Drakes. However, Lawrence doesn't appear as a 55% match doesn't meet the threshold despite them looking like the same person. Conversely, Washington does appear at a 71% match, despite them certainly not being the same person, due to the (relatively long) matching surname.
 
   | name              | Person Name       | degree    |
   |-------------------|-------------------|-----------|
@@ -493,18 +495,20 @@ You can also include the matching degree number as a column by specifying it in 
   <summary>Example</summary>
 
   **`data1`**:
-  | name              |
-  |-------------------|
-  | Edmund Hillary    |
-  | T. E. Lawrence    |
-  | George Washington |
+  | name           |
+  |----------------|
+  | T. E. Lawrence |
+  | Marie Curie    |
+  | Mallory        |
+  | Charles Darwin |
 
   **`data2`**:
-  | Person Name            |
-  |------------------------|
-  | Edmund P. Hilly        |
-  | Thomas Edward Lawrence |
-  | Denzel Washington      |
+  | Person Name                  |
+  |------------------------------|
+  | Thomas Edward Lawrence       |
+  | Marie Antoinette             |
+  | George Herbert Leigh-Mallory |
+  | Charles Dickens              |
 
   ```python
   textmatch.run(
@@ -520,14 +524,59 @@ You can also include the matching degree number as a column by specifying it in 
   )
   ```
 
-  This gives us a good match for Hilary and Lawrence, although we still have an erronious match for Washington:
+  This gives us a good-enough match for Lawrence, and accurately avoids matching the Maries. However, we don't match Mallory as his full name has so many more characters. Conversely, Darwin appears as a match with Dickens despite them being different people, due to the shared first name and similar-length surnames.
 
-  | name              | Person Name            | degree     |
-  |-------------------|------------------------|------------|
-  | Edmund Hillary    | Edmund P. Hilly        | 0.82758623 |
-  | T. E. Lawrence    | Thomas Edward Lawrence | 0.6666667  |
-  | George Washington | Denzel Washington      | 0.7647059  |
+  | name            | Person Name           | degree    |
+  |-----------------|-----------------------|-----------|
+  | T. E. Lawrence | Thomas Edward Lawrence | 0.6666667 |
+  | Charles Darwin | Charles Dickens        | 0.7586207 |
 </details>
+
+**`partial-ratcliff-obershelp`** differs from the standard algorithm by only considering the single longest common substring rather than recursively finding further matches on either side. The final score is its length divided by the length of the shorter string. It is good when one string is expected to be a substring of the other, such as matching a short name against a full name. Performs compared matching.
+
+<details>
+  <summary>Example</summary>
+
+  **`data1`**:
+  | name                |
+  |---------------------|
+  | Mallory             |
+  | Ernest Shackleton   |
+  | Henry Hudson        |
+  | Amelia Mary Earhart |
+
+  **`data2`**:
+  | Person Name                   |
+  |-------------------------------|
+  | George Herbert Leigh-Mallory  |
+  | Ernest Hemingway              |
+  | surname Hudson forename Henry |
+  | Amelia Mary Brown             |
+
+  ```python
+  textmatch.run(
+    data1,
+    data2,
+    matching=[
+      {
+        'fields': [{'1': 'name', '2': 'Person Name'}],
+        'method': 'partial-ratcliff-obershelp',
+      }
+    ],
+    output=['1*', '2*', 'degree']
+  )
+  ```
+This gives us a 100% match for Mallory, despite the difference in length between the two strings. We avoid matching the two Earnests. However, we miss a match for Hudson due to the extra text and different ordering of the words. We also get an erronious match for the Amelias due to the shared first and middle names.
+
+  | name                | Person Name                  | degree    |
+  |---------------------|------------------------------|-----------|
+  | Mallory             | George Herbert Leigh-Mallory | 1.0       |
+  | Amelia Mary Earhart | Amelia Mary Brown            | 0.7058824 |
+</details>
+
+**`tokenset-ratcliff-obershelp`** splits the words in each string into those that are common to both -- the intersection -- and those that are unique to each -- the remainders. It then constructs three strings: the sorted intersection, the sorted intersection plus the sorted remainder from the first string, and the sorted intersection plus the sorted remainder from the second string. Each pair is then compared using Ratcliff-Obershelp. The best score here becomes the degree. Because the intersection component is always identical, scores are higher when it makes up a larger share of the full string or the remainders are very similar. Performs compared matching.
+
+**`tokenset-partial-ratcliff-obershelp`** also uses the tokenset approach above, but uses Partial Ratcliff-Obershelp instead. Performs compared matching.
 
 [**`jaro-winkler`**](https://en.wikipedia.org/wiki/Jaro–Winkler_distance) counts characters in common between the two strings, though it considers differences near the start of the string to be more significant than differences near the end. Performs compared matching.
 
