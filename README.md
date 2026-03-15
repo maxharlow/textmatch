@@ -202,7 +202,7 @@ Combining different forms of ignorance can be quite powerful. The order in which
   | Daniel DeFoe | Daniel De Foe  |
 </details>
 
-**`nonlatin`** ignores non-Latin characters. This covers both [Unicode normalisation](https://en.wikipedia.org/wiki/Unicode_equivalence), where characters look the same but technically are not, and transliteration, where words are written in an alternative alphabet.
+**`nonlatin`** ignores non-Latin characters. This covers both [Unicode normalisation](https://en.wikipedia.org/wiki/Unicode_equivalence), where characters look the same but technically are not, and transliteration, where words are written in an alternative alphabet. Also see the phonetic matching method, below.
 
 <details>
   <summary>Example</summary>
@@ -531,7 +531,7 @@ You can also include the matching degree number as a column by specifying it in 
 
 [**`jaro-winkler`**](https://en.wikipedia.org/wiki/Jaro–Winkler_distance) counts characters in common between the two strings, though it considers differences near the start of the string to be more significant than differences near the end. Performs compared matching.
 
-[**`double-metaphone`**](https://en.wikipedia.org/wiki/Metaphone#Double_Metaphone) (alias **`phonetic`**) converts the words in each string into a representation of how they are pronounced. Tends to work well for data which has been transcribed or transliterated. Performs applied matching.
+[**`double-metaphone`**](https://en.wikipedia.org/wiki/Metaphone#Double_Metaphone) (alias **`phonetic`**) converts the words in each string into a representation of how they are pronounced. Tends to work well for data which has been transcribed or transliterated. Performs applied matching. Also see the `nonlatin` ignore, above.
 
 <details>
   <summary>Example</summary>
